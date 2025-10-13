@@ -1,0 +1,96 @@
+.legal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2500;
+  opacity: 0;
+  animation: legalFadeIn 0.4s forwards;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.legal-overlay.fade-out {
+  animation: legalFadeOut 0.4s forwards;
+}
+
+.legal-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+}
+
+.legal-overlay-content {
+  position: relative;
+  background: #ffffffee;
+  color: #111;
+  max-width: 100%;
+  max-height: 100dvh;
+  width: 100%;
+  border-radius: 0px;
+  padding: 50px 28px 40px;
+  box-shadow: 0 10px 40px -8px rgba(0,0,0,0.4);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  /* Ensure touch devices can scroll this container even if the app globally disables panning */
+  touch-action: pan-y;
+  pointer-events: auto;
+  box-sizing: border-box;
+
+  @media screen and (min-width: 768px) {
+    max-height: 80dvh;
+    padding: 32px 28px 40px;
+    max-width: min(800px, 92%);
+  }
+}
+
+.legal-overlay-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: none;
+  color: #222;
+  font-size: 34px;
+  line-height: 1;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+  background-color: transparent;
+  outline: none;
+}
+
+.legal-title {
+  margin: 0 0 12px;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+}
+
+.legal-body {
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: 0.3px;
+}
+
+.legal-body p {
+  margin: 0 0 2px;
+}
+
+.legal-body a {
+  color: #000;
+  text-decoration: underline;
+}
+
+@media screen and (min-width: 640px) {
+  .legal-title { font-size: 28px; }
+  .legal-body { font-size: 15px; }
+}
+
+@keyframes legalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes legalFadeOut { from { opacity: 1; } to { opacity: 0; } }

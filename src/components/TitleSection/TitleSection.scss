@@ -1,0 +1,170 @@
+.title-section-wrapper {
+  position: relative;
+}
+
+// Add styles for the TitleSection component
+.title-section {
+  position: absolute;
+  width: 100%;
+  top: -50dvh;
+  height: calc(200dvh);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #b9b5b3;
+  color: white;
+  font-size: 3rem;
+  text-align: center;
+  z-index: 1;
+  text-align: left;
+  user-select: none; /* Prevent text selection */
+  background-image: url(/images/bg-test.jpg);
+  background-size: cover;
+  background-position: center center;
+  mask-image: linear-gradient(to bottom, transparent, black 25%, black 75%, transparent);
+  user-select: none;
+  pointer-events: none;
+  font-family: var(--title-font);
+
+  .loader-divider {
+    margin: 0 auto;
+    position: relative;
+    top: -25px;
+    max-width: 500px;
+    opacity: 0;
+    transition: 0.5s ease-in-out;
+    transition-delay: 0.5s;
+  }
+
+  .trigger {
+    position: absolute;
+    top: 50dvh;
+    height: 1px;
+    width: 100%;
+  }
+
+  .section-trigger {
+    position: absolute;
+    top: 50dvh;
+    height: 1px;
+    width: 100%;
+  }
+
+  .title {
+    font-size: 0.5em;
+    line-height: 1em;
+  }
+
+  .subtitle {
+    line-height: 1em;
+    margin: auto;
+    display: block;
+  }
+
+  @media screen and (min-width: 1024px) {
+    font-size: 4rem;
+  }
+
+  @media screen and (min-width: 1140px) {
+    font-size: 6rem;
+  }
+
+  .title-section-container {
+    overflow: visible; /* Ensure no content is cropped */
+    height: auto; /* Allow the container to adjust to the content */
+    margin: 7vh auto 0; /* Center the container horizontally */
+    text-align: center; /* Center the text within the container */
+  }
+
+  svg {
+    overflow: visible; /* Ensure the SVG does not crop its content */
+    height: auto; /* Adjust height dynamically based on content */
+    display: block;
+    margin: 0 auto; /* Center the SVG horizontally */
+  }
+
+  .title, .subtitle {
+    fill: rgba(0,0,0,0); /* Initially, no fill */
+    stroke: #000; /* Stroke color for the outline */
+    stroke-width: 1px; /* Adjust stroke width as needed */
+    stroke-dasharray: 500; /* Length of the stroke */
+    stroke-dashoffset: 500; /* Start with the stroke hidden */
+    transition: none; /* Disable animation by default */
+  }
+
+  .title {
+    stroke: #000;
+  }
+
+  .animate .subtitle {
+    animation: draw 4s linear forwards, fill 1s linear 1.25s forwards; /* Enable animation when visible */
+  }
+
+  .animate .title {
+    animation: draw 4s linear 0.25s forwards, fill2 1s linear 1.5s forwards; /* Enable animation when visible */
+  }
+
+  @keyframes draw {
+    from {
+      
+    }
+    to { 
+      stroke-dashoffset: 0; /* Draw the stroke */
+    }
+  }
+
+  @keyframes fill {
+    to {
+      stroke: #000;
+      fill: black; /* Fill the text after the stroke animation */
+    }
+  }
+
+  @keyframes fill2 {
+    to {
+      stroke: #574343;
+      fill: #574343; /* Fill the text after the stroke animation */
+    }
+  }
+}
+
+#section-1 {
+  height: calc(125dvh);  
+  top: 0dvh;
+  mask-image: linear-gradient(to bottom, black 75%, transparent);
+
+  .title-section-container {
+    margin-top: -12%;
+  }
+
+  .trigger {
+    top: 0;
+  }
+}
+
+.title-section-content {
+  font-family: var(--body-font);
+  color: #000;
+  font-size: 1.5rem;
+  margin-top: -1em;
+  opacity: 0;
+  transition: 0.5s ease-in-out;
+  transition-delay: 0.7s;
+
+  @media screen and (min-width: 768px) {
+    font-size: 2rem;
+    margin-top: -1.5em;
+  }
+
+}
+
+.animate {
+  .loader-divider {
+    opacity: 1;
+  }
+
+  
+  .title-section-content {
+    opacity: 1;
+  }
+}

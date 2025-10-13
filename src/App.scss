@@ -1,0 +1,82 @@
+@import url('../public/fonts/bellefair/stylesheet.css');
+@import url('../public/fonts/playground/stylesheet.css');
+@import url('../public/fonts/youngserif/stylesheet.css');
+
+:root {
+  --title-font: 'Playground', serif;
+  --body-font: 'Bellefair', serif;
+  --label-font: 'Young Serif', serif;
+}
+
+html, body, #app{
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  font-family: var(--body-font);
+  width: 100%;
+}
+
+#app {
+  
+}
+
+canvas {
+  display: block;
+  width: 100dvw;
+  height: 100dvh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-image: linear-gradient(to top, #b6b5af, #d3cccb);
+  // background-image: url(images/background.webp);
+}
+
+.persona-space {
+  height: 600dvh;
+
+  &.persona-2 {
+    height: 1200dvh;
+  }
+}
+
+::selection {
+  background-color: #9b8886; /* Light blue background for selected text */
+  color: #000; /* Black text color for better contrast */
+}
+
+.app-canvas {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#root {
+  display: flex;
+  flex-flow: column;
+}
+
+.label-info {
+  display: flex;
+  align-items: center;
+  font-family: sans-serif;
+
+  &.right {
+    flex-direction: row-reverse;
+  }
+
+  .line {
+    height: 3px;
+    width: 3px;
+    margin: 0 10px;
+    background-color: #1A1A1A;
+  }
+
+  .text {
+    background-color: #1A1A1A;
+    color: #FFF;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+}

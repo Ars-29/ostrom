@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "lib": [
+      "es5", "es6", "dom", "dom.iterable"
+    ],
+    "noUnusedLocals": false, // Disable unused local variable errors
+    "noUnusedParameters": false // Disable unused parameter errors
+  }
+}
