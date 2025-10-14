@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Floor } from './components/Floor';
 import SkySphere from '../SkySphere';
-import SceneGroup from '../SceneStreet/SceneStreet';
 import { BushSprite } from './components/BushSprite';
 import { Car } from './components/Car';
 import { degToRad } from 'three/src/math/MathUtils.js';

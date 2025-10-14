@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Sky } from '@react-three/drei';
-import { useScrollProgress } from '../contexts/ScrollProgressContext';
-import { useFrame } from '@react-three/fiber';
 
 interface SkyProps {
   turbidity?: number;

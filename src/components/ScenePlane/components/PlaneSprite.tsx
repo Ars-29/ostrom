@@ -1,7 +1,6 @@
 import React from 'react';
 import DynamicSprite from '../../DynamicSprite';
 import { useScrollProgress } from '../../../contexts/ScrollProgressContext';
-import { degToRad } from 'three/src/math/MathUtils.js';
 
 interface PlaneSpriteProps {
   basePosition?: [number, number, number];
@@ -11,26 +10,6 @@ interface PlaneSpriteProps {
   startAt?: number; // percent (0-100)
   duration?: number; // percent (0-100)
   path?: [number, number, number][]; // Array of positions for the path
-}
-
-// Cubic Bezier interpolation for 4 points
-function cubicBezier(t: number, p0: number[], p1: number[], p2: number[], p3: number[]): [number, number, number] {
-  const x =
-    Math.pow(1 - t, 3) * p0[0] +
-    3 * Math.pow(1 - t, 2) * t * p1[0] +
-    3 * (1 - t) * Math.pow(t, 2) * p2[0] +
-    Math.pow(t, 3) * p3[0];
-  const y =
-    Math.pow(1 - t, 3) * p0[1] +
-    3 * Math.pow(1 - t, 2) * t * p1[1] +
-    3 * (1 - t) * Math.pow(t, 2) * p2[1] +
-    Math.pow(t, 3) * p3[1];
-  const z =
-    Math.pow(1 - t, 3) * p0[2] +
-    3 * Math.pow(1 - t, 2) * t * p1[2] +
-    3 * (1 - t) * Math.pow(t, 2) * p2[2] +
-    Math.pow(t, 3) * p3[2];
-  return [x, y, z];
 }
 
 // Linear interpolation for 2 points

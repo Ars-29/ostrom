@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import ProgressiveApp from './components/ProgressiveApp';
 import './index.css';
 import { ScrollProgressProvider } from './contexts/ScrollProgressContext';
 import { SoundProvider } from './contexts/SoundContext';
 import { SceneProvider } from './contexts/SceneContext';
+import { serviceWorkerManager } from './utils/ServiceWorkerManager';
 
 // Stable mobile viewport height: lock to initial visible height to avoid jump when URL bar hides/shows
 function setStableAppHeight() {
@@ -35,9 +36,20 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <ScrollProgressProvider>
       <SoundProvider>
         <SceneProvider>
-          <App />
+          <ProgressiveApp />
         </SceneProvider>
       </SoundProvider>
     </ScrollProgressProvider>
   </React.StrictMode>
 );
+
+// Register Service Worker
+serviceWorkerManager.register().then((success) => {
+  if (success) {
+    console.log('✅ [Main] Service Worker registered successfully');
+  } else {
+    console.warn('⚠️ [Main] Service Worker registration failed');
+  }
+}).catch((error) => {
+  console.error('❌ [Main] Service Worker registration error:', error);
+});

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useScene } from '../../contexts/SceneContext';
-import { useLenis } from 'lenis/react';
 
 import './Timeline.scss';
 
@@ -15,7 +14,6 @@ const sections = [
 const Timeline: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const { setCurrentScene } = useScene();
-  const lenis = useLenis();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,7 +36,6 @@ const Timeline: React.FC = () => {
           if (element) {
             const rect = element.getBoundingClientRect();
             const elementTop = rect.top + window.scrollY;
-            const offset = window.innerHeight * 0.3; // 30% of viewport height
             
             if (window.scrollY >= elementTop - 0) {
               lastActive = section.key;

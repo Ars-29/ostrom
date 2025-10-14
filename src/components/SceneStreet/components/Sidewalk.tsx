@@ -13,8 +13,7 @@ interface SidewalkProps {
 export const Sidewalk: React.FC<SidewalkProps> = ({
   position = [0, 0.15, -10],
   rotation = [0, 0, 0],
-  size = [20, 3, 0.3],
-  motifSize = 2, // 1 unit = 1 motif (modifiable)
+  size = [20, 3, 0.3]
 }) => {
   // Load a texture for the top face
   const topTexture = useLoader(TextureLoader, `${import.meta.env.BASE_URL}images/street/sidewalk.jpg`);

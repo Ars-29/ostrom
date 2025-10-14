@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState, useCallback } from 'react';
+import React, { createContext, useContext, useRef, useState, useCallback, useMemo } from 'react';
 
 interface SoundContextType {
   setAmbient: (scene: 'street' | 'road' | 'plane' | null) => void;
@@ -150,8 +150,20 @@ export const SoundProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, [muted]);
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    setAmbient,
+    playEffect,
+    muted,
+    toggleMute,
+    enabled,
+    setSoundEnabled,
+    registerVideo,
+    unregisterVideo
+  }), [setAmbient, playEffect, muted, toggleMute, enabled, setSoundEnabled, registerVideo, unregisterVideo]);
+
   return (
-    <SoundContext.Provider value={{ setAmbient, playEffect, muted, toggleMute, enabled, setSoundEnabled, registerVideo, unregisterVideo }}>
+    <SoundContext.Provider value={contextValue}>
       {children}
     </SoundContext.Provider>
   );

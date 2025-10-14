@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame, useLoader } from '@react-three/fiber';
+import { useAdaptiveQuality } from '../../../hooks/useAdaptiveQuality';
 
-const PARTICLE_COUNT = 500;
 const AREA_WIDTH = 60;
 const AREA_DEPTH = 30;
 const AREA_HEIGHT = 15;
@@ -17,6 +17,8 @@ interface SandParticlesProps {
 
 const SandParticles: React.FC<SandParticlesProps> = ({ order = 0 }) => {
   const meshRef = useRef<THREE.Points>(null);
+  const { qualitySettings } = useAdaptiveQuality();
+  const PARTICLE_COUNT = qualitySettings.particleCount * 10; // Scale up for sand particles
   const texture = useLoader(THREE.TextureLoader, PARTICLE_TEXTURE_PATH);
   const velocities = useRef(
     Array.from({ length: PARTICLE_COUNT }, () => 0.025 + Math.random() * 0.025)

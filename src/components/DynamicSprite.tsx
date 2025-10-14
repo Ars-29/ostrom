@@ -1,4 +1,4 @@
-import React, { use, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, memo } from 'react';
 import { TextureLoader, ShaderMaterial, DoubleSide } from 'three';
 import { useLoader, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -6,7 +6,6 @@ import LabelInfo from './LabelInfo';
 import { useOverlayImage } from '../contexts/OverlayImageContext';
 import { useLabelInfo } from '../contexts/LabelInfoContext';
 import { useSound } from '../contexts/SoundContext';
-import { useIsMobile } from '../hooks/useIsMobile';
 
 interface DynamicSpriteProps {
     texture: string; // URL of the texture image
@@ -31,8 +30,8 @@ interface DynamicSpriteProps {
     }
 }
 
-const DynamicSprite: React.FC<DynamicSpriteProps> = ({ 
-  texture, size, position, rotation, order, alpha = 1, fadeInOnCamera = false, 
+const DynamicSprite: React.FC<DynamicSpriteProps> = memo(({ 
+  texture, size, position, rotation, order, alpha = 1, fadeInOnCamera = false,
   color = false, billboard = false, mirrorX = false, active = true, label 
 }) => {
   const loadedTexture = useLoader(TextureLoader, import.meta.env.BASE_URL + 'images/' + texture);
@@ -55,8 +54,8 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = ({
   
   const [isOver, setIsOver] = useState(false);
   const [progress, setProgress] = useState(isTouchDevice ? 1 : 0); // Start with full progress on mobile
-  const [visibleAlpha, setVisibleAlpha] = useState(fadeInOnCamera ? 1 : 1);
-  const [isVisible, setIsVisible] = useState(true);
+  const [visibleAlpha] = useState(fadeInOnCamera ? 1 : 1);
+  const [isVisible] = useState(true);
 
   const rotationInRadians = useMemo(() => {
     return rotation.map((angle) => angle * (Math.PI / 180)) as [number, number, number];
@@ -271,6 +270,6 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = ({
       )}
     </group>
   );
-};
+});
 
 export default DynamicSprite;

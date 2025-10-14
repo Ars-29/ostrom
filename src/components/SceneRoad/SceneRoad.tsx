@@ -1,9 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Floor } from './components/Floor';
 import DynamicSprite from '../DynamicSprite';
-import LabelInfo from '../LabelInfo';
 import { useScene } from '../../contexts/SceneContext';
 import { SmokeParticles } from './SmokeParticles';
 import { CarSmokeParticles } from './CarSmokeParticles';
@@ -13,9 +12,10 @@ interface SceneRoadProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: [number, number, number];
+  visible?: boolean;
 }
 
-const SceneRoad: React.FC<SceneRoadProps> = ({ position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1] }) => {
+const SceneRoad: React.FC<SceneRoadProps> = memo(({ position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1], visible = true }) => {
   const groupRef = useRef<THREE.Group>(null);
   const { currentScene } = useScene();
   const isActive = currentScene === 'section-2';
@@ -23,9 +23,9 @@ const SceneRoad: React.FC<SceneRoadProps> = ({ position = [0, 0, 0], rotation = 
 
   useEffect(() => {
     if (groupRef.current) {
-      groupRef.current.position.set(...position);
-      groupRef.current.rotation.set(...rotation);
-      groupRef.current.scale.set(...scale);
+      groupRef.current.position.set(position[0], position[1], position[2]);
+      groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
+      groupRef.current.scale.set(scale[0], scale[1], scale[2]);
     }
   }, [position, rotation, scale]);
 
@@ -34,7 +34,7 @@ const SceneRoad: React.FC<SceneRoadProps> = ({ position = [0, 0, 0], rotation = 
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} visible={visible}>
 
       <Floor />
 
@@ -234,6 +234,6 @@ const SceneRoad: React.FC<SceneRoadProps> = ({ position = [0, 0, 0], rotation = 
 
     </group>
   );
-};
+});
 
 export default SceneRoad;

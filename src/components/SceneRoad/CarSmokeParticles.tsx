@@ -1,10 +1,12 @@
 import { useMemo, useRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
+import { useAdaptiveQuality } from '../../hooks/useAdaptiveQuality';
 
 export const CarSmokeParticles = ({ position, order, windDirection }: { position: [number, number, number]; order: number; windDirection: [number, number, number] }) => {
   const particlesRef = useRef<THREE.Points>(null);
-  const particleCount = 30;
+  const { qualitySettings } = useAdaptiveQuality();
+  const particleCount = qualitySettings.particleCount; // Use adaptive particle count
   const texture = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}images/smoke.png`);
 
   // Simple particle data

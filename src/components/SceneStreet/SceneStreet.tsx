@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Floor } from './components/Floor';
@@ -12,18 +12,19 @@ interface SceneStreetProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: [number, number, number];
+  visible?: boolean;
 }
 
-const SceneStreet: React.FC<SceneStreetProps> = ({ position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1] }) => {
+const SceneStreet: React.FC<SceneStreetProps> = memo(({ position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1], visible = true }) => {
   const groupRef = useRef<THREE.Group>(null);
   const { currentScene } = useScene();
   const isActive = currentScene === 'section-1';
 
   useEffect(() => {
     if (groupRef.current) {
-      groupRef.current.position.set(...position);
-      groupRef.current.rotation.set(...rotation);
-      groupRef.current.scale.set(...scale);
+      groupRef.current.position.set(position[0], position[1], position[2]);
+      groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
+      groupRef.current.scale.set(scale[0], scale[1], scale[2]);
     }
   }, [position, rotation, scale]);
 
@@ -32,7 +33,7 @@ const SceneStreet: React.FC<SceneStreetProps> = ({ position = [0, 0, 0], rotatio
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} visible={visible}>
 
 
       <Floor />
@@ -171,6 +172,6 @@ const SceneStreet: React.FC<SceneStreetProps> = ({ position = [0, 0, 0], rotatio
       
     </group>
   );
-};
+});
 
 export default SceneStreet;

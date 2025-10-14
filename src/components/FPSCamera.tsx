@@ -16,10 +16,6 @@ const KEY_BINDINGS = {
 const SPEED = 0.12;
 const RUN_SPEED = 0.28;
 const CROUCH_SPEED = 0.07;
-const JUMP_VELOCITY = 0.22;
-const GRAVITY = 0.012;
-const STAND_HEIGHT = 1.6;
-const CROUCH_HEIGHT = 1.0;
 
 interface FPSCameraProps {
   disabled?: boolean;
@@ -27,9 +23,7 @@ interface FPSCameraProps {
 
 export const FPSCamera = ({ disabled }: FPSCameraProps) => {
   const { camera } = useThree();
-  const velocity = useRef(new THREE.Vector3());
   const direction = useRef(new THREE.Vector3());
-  const canJump = useRef(true);
   const keys = useRef<{ [key: string]: boolean }>({});
   const pitch = useRef(0);
   const yaw = useRef(0);

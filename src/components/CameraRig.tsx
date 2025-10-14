@@ -1,10 +1,9 @@
 // src/components/CameraRig.tsx
 import { useFrame, useThree } from '@react-three/fiber';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { useScrollProgress } from '../contexts/ScrollProgressContext';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import { useIsMobile } from '../hooks/useIsMobile';
 
 const sectionPaths = [
   new THREE.CatmullRomCurve3([
@@ -88,7 +87,6 @@ export const CameraRig = () => {
   const currentMouseOffset = useRef(new THREE.Vector2(0, 0));
 
   const isTouchDevice = 'ontouchstart' in window;
-  const isMobile = useIsMobile(768);
 
   // Fixed section heights in viewport units
   const SECTION_HEIGHTS = {
@@ -101,10 +99,6 @@ export const CameraRig = () => {
     section3: 6     // 900dvh = 9 viewport heights
   };
   
-  const getTotalHeight = () => {
-    return (SECTION_HEIGHTS.intro + SECTION_HEIGHTS.section1 + SECTION_HEIGHTS.section2 + SECTION_HEIGHTS.section3) * window.innerHeight;
-  };
-
   useEffect(() => {
     if (!isTouchDevice) {
       const handleMouseMove = (event: MouseEvent) => {
@@ -119,11 +113,31 @@ export const CameraRig = () => {
     }
   }, []);
 
-  // Ratio du scroll utilisé pour le mouvement de la caméra, par section
-  const CAMERA_MOVE_RATIOS = [0.8, 0.9, 1];
+  // Memoize expensive calculations
+  const sectionBoundaries = useMemo(() => {
+    const introEnd = SECTION_HEIGHTS.intro;
+    const title1End = introEnd + SECTION_HEIGHTS.title1;
+    const section1End = title1End + SECTION_HEIGHTS.section1;
+    const title2End = section1End + SECTION_HEIGHTS.title2;
+    const section2End = title2End + SECTION_HEIGHTS.section2;
+    const title3End = section2End + SECTION_HEIGHTS.title3;
+    const section3End = title3End + SECTION_HEIGHTS.section3;
+    
+    return {
+      introEnd,
+      title1End,
+      section1End,
+      title2End,
+      section2End,
+      title3End,
+      section3End
+    };
+  }, []);
+
+  const CAMERA_MOVE_RATIOS = useMemo(() => [0.8, 0.9, 1], []);
 
   useFrame(() => {
-    // Calculate total scroll progress (0 to 1)
+    // Calculate total scroll progress (0 to 1) - cache expensive calculations
     const totalScrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
     const currentScrollY = scroll * totalScrollableHeight;
     
@@ -131,14 +145,7 @@ export const CameraRig = () => {
     const viewportHeightsScrolled = currentScrollY / window.innerHeight;
     
     // Define section boundaries in viewport heights
-    const introEnd = SECTION_HEIGHTS.intro; // 1vh
-    const title1End = introEnd + SECTION_HEIGHTS.title1; // 2vh
-    const section1End = title1End + SECTION_HEIGHTS.section1; // 11vh
-    const title2End = section1End + SECTION_HEIGHTS.title2; // 12vh
-    const section2End = title2End + SECTION_HEIGHTS.section2; // 30vh
-    const title3End = section2End + SECTION_HEIGHTS.title3; // 31vh
-    // section3 goes from title3End to end
-    const section3End = title3End + SECTION_HEIGHTS.section3; // Ajout de la variable section3End pour le calcul correct
+    const { introEnd, title1End, section1End, title2End, section2End, title3End, section3End } = sectionBoundaries;
     
     // Determine current section and progress within that section
     let currentSection = 0;

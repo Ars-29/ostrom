@@ -16,6 +16,9 @@ import { useScene } from './contexts/SceneContext';
 import { useSound } from './contexts/SoundContext';
 import FPSStats from './components/FPSStats';
 import { useIsMobile } from './hooks/useIsMobile';
+import ServiceWorkerDebug from './components/ServiceWorkerDebug';
+import FloatingContactButton from './components/FloatingContactButton';
+import HamburgerMenu from './components/HamburgerMenu';
 
 import './App.scss';
 
@@ -24,6 +27,7 @@ const debugMode = false;
 const App = () => {
   const isMobile = useIsMobile(768);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { setSoundEnabled } = useSound();
   const { currentScene } = useScene();
   const { setAmbient } = useSound();
@@ -38,7 +42,7 @@ const App = () => {
       // Map section id to ambient sound key
       if (currentScene === 'section-1') setAmbient('street');
       else if (currentScene === 'section-2') setAmbient('road');
-      else if (currentScene === 'section-3') setAmbient('plane');
+      else if (currentScene === 'section-3' || currentScene === 'footer') setAmbient('plane');
       else setAmbient(null);
     } else {
       console.log('Stopping ambient sound - intro or not started');
@@ -51,6 +55,63 @@ const App = () => {
     setHasStarted(true);
     // Don't enable sound system here - let it be enabled when we actually need ambient sounds
   };
+
+  // Navigation menu items
+  const menuItems = [
+    {
+      id: 'home',
+      label: 'Home',
+      icon: '🏠',
+      onClick: () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    },
+    {
+      id: 'urban-pioneer',
+      label: 'The Urban Pioneer',
+      icon: '🏙️',
+      onClick: () => {
+        const element = document.getElementById('section-1');
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
+    {
+      id: 'connoisseurs',
+      label: 'Connoisseurs of Speed',
+      icon: '🏎️',
+      onClick: () => {
+        const element = document.getElementById('section-2');
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
+    {
+      id: 'above-beyond',
+      label: 'Above and Beyond',
+      icon: '✈️',
+      onClick: () => {
+        const element = document.getElementById('section-3');
+        element?.scrollIntoView({ behavior: 'smooth' });
+      }
+    },
+    {
+      id: 'contact',
+      label: 'Contact',
+      icon: '📧',
+      onClick: () => {
+        console.log('Contact clicked - no action for now');
+        // TODO: Add contact form or modal
+      }
+    },
+    {
+      id: 'discord',
+      label: 'Discord',
+      icon: '💬',
+      onClick: () => {
+        console.log('Discord clicked - no action for now');
+        // TODO: Add Discord integration
+      }
+    }
+  ];
 
   return (
     <LabelInfoProvider>
@@ -111,6 +172,26 @@ const App = () => {
           )}
           <SceneCanvas debugMode={debugMode} />
           <MuteButton />
+          <ServiceWorkerDebug isVisible={debugMode} />
+          
+          {/* Enhanced UI Components */}
+          <FloatingContactButton 
+            position="bottom-left"
+            showDelay={3000}
+            hideOnScroll={false}
+            onClick={() => {
+              console.log('Contact button clicked - no action for now');
+              // TODO: Add contact form or modal
+            }}
+          />
+          
+          <HamburgerMenu
+            items={menuItems}
+            isOpen={isMenuOpen}
+            onToggle={() => setIsMenuOpen(!isMenuOpen)}
+            onClose={() => setIsMenuOpen(false)}
+            position="right"
+          />
         </ReactLenis>
       </OverlayImageProvider>
     </LabelInfoProvider>

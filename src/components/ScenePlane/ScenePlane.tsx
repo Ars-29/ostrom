@@ -1,10 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Floor } from './components/Floor';
 import DynamicSprite from '../DynamicSprite';
-import LabelInfo from '../LabelInfo';
-import PlaneBackground from './components/PlaneBackground';
 import SandParticles from './components/SandParticles';
 import { degToRad } from 'three/src/math/MathUtils.js';
 import PlaneSprite from './components/PlaneSprite';
@@ -15,28 +13,45 @@ interface ScenePlaneProps {
   position?: [number, number, number];
   rotation?: [number, number, number];
   scale?: [number, number, number];
+  visible?: boolean;
 }
 
-const ScenePlane: React.FC<ScenePlaneProps> = ({ position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1] }) => {
+const ScenePlane: React.FC<ScenePlaneProps> = memo(({ position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1], visible = true }) => {
   const groupRef = useRef<THREE.Group>(null);
   const { currentScene } = useScene();
-  const isActive = currentScene === 'section-3';
+  const isActive = currentScene === 'section-3' || currentScene === 'footer';
   const isMobile = useIsMobile(768);
 
   useEffect(() => {
     if (groupRef.current) {
-      groupRef.current.position.set(...position);
-      groupRef.current.rotation.set(...rotation);
-      groupRef.current.scale.set(...scale);
+      groupRef.current.position.set(position[0], position[1], position[2]);
+      groupRef.current.rotation.set(rotation[0], rotation[1], rotation[2]);
+      groupRef.current.scale.set(scale[0], scale[1], scale[2]);
     }
-  }, [position, rotation, scale]);
+    
+    // Debug logging for plane scene visibility
+    if (visible && isActive) {
+      console.log(`🚁 [ScenePlane] Plane scene is now visible and active (${currentScene})`);
+      console.log('🚁 [ScenePlane] Checking asset loading status...');
+      
+      // Check if critical assets are loaded
+      import('../../utils/EnhancedSceneAssetPreloader').then(({ enhancedScenePreloader }) => {
+        const loadingState = enhancedScenePreloader.getLoadingState('section-3');
+        console.log(`🚁 [ScenePlane] Asset loading state: ${loadingState}`);
+        
+        if (loadingState === 'error') {
+          console.warn('⚠️ [ScenePlane] Some plane scene assets failed to load - background may appear gray');
+        }
+      });
+    }
+  }, [position, rotation, scale, visible, isActive]);
 
   useFrame(() => {
     // Optional: Add animations or updates for the group here
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} visible={visible}>
 
       <pointLight position={[0, 10, 20]} intensity={200} castShadow  />
 
@@ -103,6 +118,6 @@ const ScenePlane: React.FC<ScenePlaneProps> = ({ position = [0, 0, 0], rotation 
 
     </group>
   );
-};
+});
 
 export default ScenePlane;

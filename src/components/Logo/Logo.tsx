@@ -1,15 +1,13 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import './Logo.scss';
 import logo from '../../../public/images/logo_black.svg';
 import { useScrollProgress } from '../../contexts/ScrollProgressContext';
-import { useLenis } from 'lenis/react';
 
 interface LogoProps {
   className?: string;
 }
 
 const Logo:FC<LogoProps> = ({className}) => {
-  const lenis = useLenis();
   const scrollProgress = useScrollProgress();
   const [rotation, setRotation] = useState(0);
   const [velocity, setVelocity] = useState(0);

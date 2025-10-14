@@ -1,10 +1,9 @@
 import { useLoader, useFrame } from '@react-three/fiber';
-import { useMemo, useState } from 'react';
-import { RepeatWrapping, TextureLoader, ShaderMaterial, Vector2 } from 'three';
+import { useMemo } from 'react';
+import { RepeatWrapping, TextureLoader, ShaderMaterial } from 'three';
 import { Plane } from '@react-three/drei';
 
 export const DistortFloor = () => {
-  const [mouse, setMouse] = useState(new Vector2(0.5, 0.5));
 
   const texture = useLoader(TextureLoader, `${import.meta.env.BASE_URL}images/Ground_Dirt_009_BaseColor.jpg`);
   texture.wrapS = texture.wrapT = RepeatWrapping;
@@ -79,13 +78,12 @@ export const DistortFloor = () => {
     });
   }, [texture, displacementMap, normalMap]);
 
-  useFrame(({ clock, mouse: threeMouse, camera }) => {
+  useFrame(({ clock, mouse: threeMouse }) => {
     fluidMaterial.uniforms.uTime.value = clock.getElapsedTime();
 
     // Convert mouse position from NDC (-1 to 1) to UV space (0 to 1)
     const x = (threeMouse.x + 1) / 2;
     const y = (1 - threeMouse.y) / 2; // Invert Y-axis for UV space
-    setMouse(new Vector2(x, y));
     fluidMaterial.uniforms.uMouse.value = [x, y];
   });
 

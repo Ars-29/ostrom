@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 
 interface SceneContextType {
   currentScene: string | null;
@@ -10,10 +10,19 @@ const SceneContext = createContext<SceneContextType | undefined>(undefined);
 export const SceneProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentScene, setCurrentScene] = useState<string | null>(null);
 
-  // Optionally, persist or sync scene here
+  // Memoize the setCurrentScene function to prevent unnecessary re-renders
+  const memoizedSetCurrentScene = useCallback((scene: string) => {
+    setCurrentScene(scene);
+  }, []);
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    currentScene,
+    setCurrentScene: memoizedSetCurrentScene
+  }), [currentScene, memoizedSetCurrentScene]);
 
   return (
-    <SceneContext.Provider value={{ currentScene, setCurrentScene }}>
+    <SceneContext.Provider value={contextValue}>
       {children}
     </SceneContext.Provider>
   );

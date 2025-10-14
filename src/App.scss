@@ -27,8 +27,12 @@ canvas {
   position: fixed;
   left: 0;
   top: 0;
-  background-image: linear-gradient(to top, #b6b5af, #d3cccb);
-  // background-image: url(images/background.webp);
+  background-color: #b6b5af; /* Fallback color matching the original texture */
+  background-image: url(images/background.webp);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .persona-space {

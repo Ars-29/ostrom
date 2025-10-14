@@ -7,6 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build2": "vite build",
+    "build:analyze": "npm run build && node scripts/build-analysis.js",
+    "test:sw": "node scripts/test-service-worker.js",
+    "compress:images": "node scripts/compress-images.cjs",
+    "compress:videos": "node scripts/compress-videos.cjs",
+    "compress:atlases": "node scripts/generate-texture-atlases.cjs",
+    "compress:all": "node scripts/run-compression.cjs",
+    "compress:demo": "node scripts/compression-demo.cjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

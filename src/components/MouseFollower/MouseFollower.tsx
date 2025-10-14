@@ -17,8 +17,6 @@ const MouseFollower: React.FC = () => {
     const animate = () => {
       const follower = followerRef.current;
       const followerSmall = followerRefSmall.current;
-      const circleSize = 40; // Match the CSS width/height of the larger circle
-      const smallCircleSize = 6; // Match the CSS width/height of the smaller circle
 
       if (follower && followerSmall) {
         // Update larger circle position

@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useMouseWiggle } from '../hooks/useMouseWiggle';
-import { useHelper } from '@react-three/drei';
 import { SpotLight } from 'three';
 import { useScene } from '../contexts/SceneContext';
 
@@ -40,7 +38,6 @@ const sceneLightSettings: Record<string, LightSettings> = {
 export const Lights: React.FC<{debug?: boolean}> = ({debug}) => {
   const redLightRef = useRef<SpotLight>(null);
   const { camera } = useThree();
-  const mouseWiggle = useMouseWiggle(0.75, 0.8);
   const { currentScene } = useScene();
   const isTouchDevice = 'ontouchstart' in window;
 

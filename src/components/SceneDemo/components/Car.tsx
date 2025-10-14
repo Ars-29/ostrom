@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { animate, useAnimation } from 'framer-motion';
+import { animate } from 'framer-motion';
 import { useScrollProgress } from '../../../contexts/ScrollProgressContext';
-import { degToRad, radToDeg } from 'three/src/math/MathUtils.js';
+import { degToRad } from 'three/src/math/MathUtils.js';
 import { DirtParticles } from './DirtParticles';
 import { Sparkles } from '@react-three/drei';
 

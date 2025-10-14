@@ -1,12 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
 import * as THREE from 'three';
-import { Html, Sparkles, Sphere } from '@react-three/drei';
+import { Html, Sparkles } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useOverlayImage } from '../contexts/OverlayImageContext';
 import { useSpring, a } from '@react-spring/three';
 import { useLabelInfo } from '../contexts/LabelInfoContext';
 import { useSound } from '../contexts/SoundContext';
-import { useIsMobile } from '../hooks/useIsMobile';
 
 interface LabelInfoProps {
   id: string;
@@ -31,7 +30,6 @@ const LabelInfo: React.FC<LabelInfoProps> = ({ id, scene, position = [0, 0, 0], 
   const [isHovered, setIsHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
   const { camera } = useThree();
-  const isMobile = useIsMobile(768); 
   const isTouchDevice = 'ontouchstart' in window;   
 
   const spring = useSpring({

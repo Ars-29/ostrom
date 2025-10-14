@@ -2,10 +2,47 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-  <!-- Use relative path so it works when hosted at /dev/ -->
   <link rel="icon" type="image/png" href="favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
-    <title>Strom</title>
+    
+    <!-- Enhanced Meta Tags for SEO and Social Sharing -->
+    <title>O.Strom - Interactive Storytelling Experience</title>
+    <meta name="description" content="Experience the journey of O.Strom through interactive 3D storytelling. Discover the urban pioneer, connoisseurs of speed, and above and beyond adventures." />
+    <meta name="keywords" content="O.Strom, storytelling, interactive, 3D, urban pioneer, speed, adventure" />
+    <meta name="author" content="O.Strom" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="O.Strom - Interactive Storytelling Experience" />
+    <meta property="og:description" content="Experience the journey of O.Strom through interactive 3D storytelling. Discover the urban pioneer, connoisseurs of speed, and above and beyond adventures." />
+    <meta property="og:image" content="/images/og-image.jpg" />
+    <meta property="og:url" content="https://ostrom.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="O.Strom" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="O.Strom - Interactive Storytelling Experience" />
+    <meta name="twitter:description" content="Experience the journey of O.Strom through interactive 3D storytelling." />
+    <meta name="twitter:image" content="/images/og-image.jpg" />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/fonts/bellefair/Bellefair-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/playground/PPPlayground-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/images/logo.svg" as="image" />
+    <link rel="preload" href="/images/background.webp" as="image" />
+    
+    <!-- Critical CSS for smooth loading -->
+    <style>
+      /* Ensure smooth transition */
+      #root {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+      }
+      
+      #root.loaded {
+        opacity: 1;
+      }
+    </style>
   </head>
   <body>
     <div id="app">

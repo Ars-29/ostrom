@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { useFrame, useLoader, useThree } from '@react-three/fiber'
+import { useFrame, useLoader } from '@react-three/fiber'
 import * as THREE from 'three'
 import { animate } from 'framer-motion';
 import { useScrollProgress } from '../../../contexts/ScrollProgressContext';
@@ -92,7 +92,6 @@ const createGrainDistortionMaterial = (texture: THREE.Texture): ShaderMaterial =
 export const BushSprite: React.FC<BushSpriteProps> = ({ textureUrl, position, size = [1, 1], rotation = [0, 0, 0], triggerY }) => {
   const texture = useLoader(THREE.TextureLoader, import.meta.env.BASE_URL + textureUrl);
   const meshRef = useRef<THREE.Mesh>(null);
-  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const materialRef = useRef(createGrainDistortionMaterial(texture)); // Unique material instance
 
   const scroll = useScrollProgress();
@@ -128,7 +127,6 @@ export const BushSprite: React.FC<BushSpriteProps> = ({ textureUrl, position, si
 
     const x = (threeMouse.x + 1) / 2;
     const y = (1 - threeMouse.y) / 2;
-    setMouse({ x, y });
     material.uniforms.uMouse.value.set(x, y);
 
     const raycaster = new THREE.Raycaster();
