@@ -78,10 +78,12 @@ export class AdaptiveQualitySystem {
     const canvas = document.createElement('canvas');
     const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
     
-    // Basic device info
-    const isMobile = window.innerWidth <= 768;
-    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
-    const isDesktop = window.innerWidth > 1024;
+    // Enhanced mobile detection using user agent
+    const userAgent = navigator.userAgent;
+    const isMobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isMobile = window.innerWidth <= 768 || isMobileUA;
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024 && !isMobileUA;
+    const isDesktop = window.innerWidth > 1024 && !isMobileUA;
     
     // Hardware info (with fallbacks)
     const memoryGB = (navigator as any).deviceMemory || 4; // Default to 4GB
@@ -129,27 +131,29 @@ export class AdaptiveQualitySystem {
   private calculateOptimalSettings(): QualitySettings {
     const { isMobile, isTablet, memoryGB, cores, effectiveType } = this.capabilities;
     
-    // Determine base quality level
-    if (isMobile || memoryGB < 4 || cores < 4 || effectiveType === 'slow-2g' || effectiveType === '2g') {
+    // Enhanced mobile detection - force low quality on mobile devices
+    if (isMobile) {
       this.qualityLevel = 'low';
-    } else if (isTablet || memoryGB < 8 || cores < 6 || effectiveType === '3g') {
+    } else if (isTablet || memoryGB < 4 || cores < 4 || effectiveType === 'slow-2g' || effectiveType === '2g') {
+      this.qualityLevel = 'low';
+    } else if (memoryGB < 8 || cores < 6 || effectiveType === '3g') {
       this.qualityLevel = 'medium';
     } else {
       this.qualityLevel = 'high';
     }
     
-    // Quality settings based on level
+    // Quality settings based on level - Mobile-optimized defaults
     const settings: QualitySettings = {
       shadows: false,
       antialias: false,
-      dpr: [0.5, 1] as [number, number],
-      farPlane: 1000,
-      fov: 75,
+      dpr: isMobile ? [0.5, 1.5] as [number, number] : [0.5, 1] as [number, number], // Cap DPR on mobile
+      farPlane: isMobile ? 100 : 1000, // Much shorter far plane on mobile
+      fov: isMobile ? 60 : 75, // Smaller FOV on mobile
       postProcessing: false,
       effectQuality: 'low' as const,
       textureQuality: 'low' as const,
-      particleCount: 15,
-      targetFPS: 30,
+      particleCount: isMobile ? 10 : 15, // Fewer particles on mobile
+      targetFPS: isMobile ? 30 : 30,
       adaptiveQuality: true
     };
     

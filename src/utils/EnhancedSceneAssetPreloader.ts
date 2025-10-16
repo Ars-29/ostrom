@@ -1,4 +1,5 @@
 // Enhanced asset definitions with priority levels
+import { getMobileAssetRouter } from './MobileAssetRouter';
 const SCENE_ASSETS_ENHANCED = {
   'section-1': {
     critical: [
@@ -106,6 +107,8 @@ export class EnhancedSceneAssetPreloader {
   private loadingStates = new Map<string, 'loading' | 'loaded' | 'error'>();
   private scrollDirection: ScrollDirection = ScrollDirection.STATIONARY;
   private lastScrollY = 0;
+  // private assetRouter = getMobileAssetRouter(); // Temporarily disabled
+  private assetRouter = getMobileAssetRouter(); // Re-enabled with fallback support
   private scrollVelocity = 0;
   private preloadDistance = 2; // Preload 2 sections ahead
 
@@ -234,6 +237,9 @@ export class EnhancedSceneAssetPreloader {
       return this.preloadQueue.get(assetPath);
     }
 
+    // Get optimized asset path using mobile asset router with fallback
+    const optimizedPath = this.assetRouter.getAssetPath(`images/${assetPath}`);
+
     const loadPromise = new Promise<void>((resolve) => {
       this.loadingStates.set(assetPath, 'loading');
       
@@ -253,8 +259,10 @@ export class EnhancedSceneAssetPreloader {
           this.loadingStates.set(assetPath, 'loaded');
           this.preloadQueue.delete(assetPath);
           
-          // Log detailed asset loading info
-          console.log(`✅ [EnhancedPreloader] ${priority} asset loaded: ${assetPath}`);
+          // Log detailed asset loading info with mobile optimization status
+          const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          const emoji = isMobile ? '📱' : '🖥️';
+          console.log(`${emoji} [EnhancedPreloader] ${priority} asset loaded: ${assetPath} -> ${optimizedPath} - ${loadTime.toFixed(2)}ms`);
           console.log(`⏱️ [EnhancedPreloader] Load time: ${loadTime.toFixed(2)}ms`);
           console.log(`📏 [EnhancedPreloader] Dimensions: ${img.width}x${img.height}`);
           
@@ -285,7 +293,7 @@ export class EnhancedSceneAssetPreloader {
           }
         };
         
-        img.src = `/images/${assetPath}`;
+        img.src = `/${optimizedPath}`;
       };
       
       attemptLoad();

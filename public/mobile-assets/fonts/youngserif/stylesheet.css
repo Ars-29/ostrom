@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Young Serif';
+    src: url('YoungSerif-Regular.woff2') format('woff2'),
+        url('YoungSerif-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+

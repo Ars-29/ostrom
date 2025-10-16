@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Logo from '../Logo/Logo';
-import imgDivider from '../../../public/images/divider.png';
+import imgDivider from '/images/divider.png';
 
 import './Loader.scss';
 

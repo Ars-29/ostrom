@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, memo } from 'react';
+import React, { useMemo, useState, memo, useCallback } from 'react';
 import { TextureLoader, ShaderMaterial, DoubleSide } from 'three';
 import { useLoader, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -6,6 +6,8 @@ import LabelInfo from './LabelInfo';
 import { useOverlayImage } from '../contexts/OverlayImageContext';
 import { useLabelInfo } from '../contexts/LabelInfoContext';
 import { useSound } from '../contexts/SoundContext';
+import { getMobileAssetRouter } from '../utils/MobileAssetRouter';
+import { useOptimizedFrame, useOptimizedCallback } from '../utils/ReactPerformanceOptimizer';
 
 interface DynamicSpriteProps {
     texture: string; // URL of the texture image
@@ -34,13 +36,25 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = memo(({
   texture, size, position, rotation, order, alpha = 1, fadeInOnCamera = false,
   color = false, billboard = false, mirrorX = false, active = true, label 
 }) => {
-  const loadedTexture = useLoader(TextureLoader, import.meta.env.BASE_URL + 'images/' + texture);
+  // Enhanced mobile detection
+  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
-  const loadedTextureColor = color
-    ? useLoader(TextureLoader, import.meta.env.BASE_URL + 'images/' + texture.replace('.webp', '_color.webp'))
+  // Get mobile asset router
+  const assetRouter = getMobileAssetRouter();
+  
+  // Get optimized asset paths
+  const optimizedTexturePath = assetRouter.getAssetPath(`images/${texture}`);
+  const optimizedColorPath = color ? assetRouter.getAssetPath(`images/${texture.replace('.webp', '_color.webp')}`) : null;
+  const optimizedMaskPath = color ? assetRouter.getAssetPath('images/mask3.png') : null;
+  
+  // Load textures with fallback to standard loader
+  const loadedTexture = useLoader(TextureLoader, import.meta.env.BASE_URL + optimizedTexturePath);
+  
+  const loadedTextureColor = color && optimizedColorPath
+    ? useLoader(TextureLoader, import.meta.env.BASE_URL + optimizedColorPath)
     : null;
-  const maskTexture = color
-    ? useLoader(TextureLoader, import.meta.env.BASE_URL + 'images/mask3.png')
+  const maskTexture = color && optimizedMaskPath
+    ? useLoader(TextureLoader, import.meta.env.BASE_URL + optimizedMaskPath)
     : null;
 
   const { camera } = useThree();
@@ -53,7 +67,7 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = memo(({
   const isTouchDevice = 'ontouchstart' in window;
   
   const [isOver, setIsOver] = useState(false);
-  const [progress, setProgress] = useState(isTouchDevice ? 1 : 0); // Start with full progress on mobile
+  const [progress, setProgress] = useState(isTouchDevice || isMobile ? 1 : 0); // Start with full progress on mobile
   const [visibleAlpha] = useState(fadeInOnCamera ? 1 : 1);
   const [isVisible] = useState(true);
 
@@ -137,19 +151,28 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = memo(({
     });
   }, [color, loadedTextureColor, maskTexture, progress, alpha]);
 
-  useFrame(() => {
-    if (!active) return;
-    
-    // On mobile, keep progress at 1 (always show color image)
-    if (isTouchDevice) {
-      if (progress !== 1) {
-        setProgress(1);
+  // Optimized useFrame with performance optimizations (MOBILE ONLY)
+  const isMobileDevice = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobileDevice) {
+    useOptimizedFrame(() => {
+      if (!active) return;
+      
+      // Mobile optimization: Skip expensive animations and calculations
+      if (isMobileDevice || isTouchDevice) {
+        // Direct material updates without React state changes
+        if (material) {
+          material.uniforms.uProgress.value = 1;
+          material.uniforms.uAlpha.value = alpha;
+        }
+        
+        // Skip billboard calculations on mobile for performance
+        if (billboard && groupRef.current && camera && !isMobileDevice) {
+          groupRef.current.lookAt(camera.position);
+        }
+        return;
       }
-      if (material) {
-        material.uniforms.uProgress.value = 1;
-        material.uniforms.uAlpha.value = alpha;
-      }
-    } else {
+      
       // Desktop behavior: animate based on hover
       const animationSpeed = 0.015; // Slightly slower for more dramatic effect
       
@@ -168,51 +191,72 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = memo(({
         material.uniforms.uProgress.value = progress;
         material.uniforms.uAlpha.value = alpha;
       }
-    }
 
-    /*
-    // Fade in when entering camera frustum
-    if (fadeInOnCamera && groupRef.current) {
-      const frustum = new THREE.Frustum();
-      const camViewProj = new THREE.Matrix4();
-      camera.updateMatrixWorld();
-      camera.updateProjectionMatrix();
-      camViewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-      frustum.setFromProjectionMatrix(camViewProj);
-      const worldPos = new THREE.Vector3();
-      groupRef.current.getWorldPosition(worldPos);
-      const visible = frustum.containsPoint(worldPos);
-      setIsVisible(visible);
-      setVisibleAlpha((prev) => {
-        if (visible && prev < 1) return Math.min(prev + 0.05, 1);
-        if (!visible && prev > 0) return Math.max(prev - 0.05, 0);
-        return prev;
-      });
-    } else if (!fadeInOnCamera && visibleAlpha !== 1) {
-      setVisibleAlpha(1);
-      setIsVisible(true);
-    }
-    */
+      // Billboard effect (only on desktop)
+      if (billboard && groupRef.current && camera && !isMobileDevice) {
+        groupRef.current.lookAt(camera.position);
+      }
+    }, [active, isMobileDevice, isTouchDevice, material, alpha, billboard, groupRef, camera, isOver, progress]);
+  } else {
+    // Desktop - use standard useFrame for better performance
+    useFrame(() => {
+      if (!active) return;
+      
+      // Desktop behavior: animate based on hover
+      const animationSpeed = 0.015;
+      
+      if (isOver && progress < 1) {
+        setProgress((prev) => {
+          const diff = 1 - prev;
+          return prev + diff * animationSpeed * 2;
+        });
+      } else if (!isOver && progress > 0) {
+        setProgress((prev) => {
+          return prev - animationSpeed;
+        });
+      }
+      
+      if (material) {
+        material.uniforms.uProgress.value = progress;
+        material.uniforms.uAlpha.value = alpha;
+      }
 
-    if (billboard && groupRef.current && camera) {
-      // Make the group face the camera
-      groupRef.current.lookAt(camera.position);
-    }
-  });
+      // Billboard effect
+      if (billboard && groupRef.current && camera) {
+        groupRef.current.lookAt(camera.position);
+      }
+    });
+  }
 
-  const onMouseEnter = useCallback(() => {
+  const onMouseEnter = isMobileDevice ? useOptimizedCallback(() => {
+    if (!isTouchDevice) {
+      setIsOver(true);
+    }
+  }, [isTouchDevice]) : useCallback(() => {
     if (!isTouchDevice) {
       setIsOver(true);
     }
   }, [isTouchDevice]);
 
-  const onMouseLeave = useCallback(() => {
+  const onMouseLeave = isMobileDevice ? useOptimizedCallback(() => {
+    if (!isTouchDevice) {
+      setIsOver(false);
+    }
+  }, [isTouchDevice]) : useCallback(() => {
     if (!isTouchDevice) {
       setIsOver(false);
     }
   }, [isTouchDevice]);
 
-  const handleSpriteClick = useCallback(() => {
+  const handleSpriteClick = isMobileDevice ? useOptimizedCallback(() => {
+    if (label) {
+      playEffect('click');
+      if (label.imageUrl) {
+        openImage(label.imageUrl, label.text);
+      }
+      markClicked(label.scene, label.id);
+    }
+  }, [label, playEffect, openImage, markClicked]) : useCallback(() => {
     if (label) {
       playEffect('click');
       if (label.imageUrl) {
