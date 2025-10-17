@@ -6,7 +6,13 @@ import { useAdaptiveQuality } from '../../hooks/useAdaptiveQuality';
 export const CarSmokeParticles = ({ position, order, windDirection }: { position: [number, number, number]; order: number; windDirection: [number, number, number] }) => {
   const particlesRef = useRef<THREE.Points>(null);
   const { qualitySettings } = useAdaptiveQuality();
-  const particleCount = qualitySettings.particleCount; // Use adaptive particle count
+  
+  // Enhanced mobile detection
+  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Further reduce particle count on mobile devices
+  const particleCount = isMobile ? Math.max(3, Math.floor(qualitySettings.particleCount * 0.3)) : qualitySettings.particleCount;
+  
   const texture = useLoader(THREE.TextureLoader, `${import.meta.env.BASE_URL}images/smoke.png`);
 
   // Simple particle data

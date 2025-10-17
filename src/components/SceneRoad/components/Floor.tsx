@@ -1,35 +1,89 @@
-import { useLoader } from '@react-three/fiber';
-import { ClampToEdgeWrapping, TextureLoader, LinearFilter } from 'three';
+import { ClampToEdgeWrapping, TextureLoader, LinearFilter, Texture } from 'three';
 import { Plane } from '@react-three/drei';
+import { useState, useEffect } from 'react';
 
 export const Floor = () => {
-  // Load the four split textures
-  const textures = useLoader(TextureLoader, [
-    `${import.meta.env.BASE_URL}images/road/road_1.jpg`,
-    `${import.meta.env.BASE_URL}images/road/road_2.jpg`,
-    `${import.meta.env.BASE_URL}images/road/road_3.jpg`,
-    `${import.meta.env.BASE_URL}images/road/road_4.jpg`,
-  ]);
-
-  // Load four displacement maps, one for each tile
-  const displacementMaps = useLoader(TextureLoader, [
-    `${import.meta.env.BASE_URL}images/road/road_1_height.webp`,
-    `${import.meta.env.BASE_URL}images/road/road_2_height.webp`,
-    `${import.meta.env.BASE_URL}images/road/road_3_height.webp`,
-    `${import.meta.env.BASE_URL}images/road/road_4_height.webp`,
-  ]);
-
-  // Set texture and displacement map properties to avoid seams
-  textures.forEach((tex) => {
-    tex.wrapS = tex.wrapT = ClampToEdgeWrapping;
-    tex.minFilter = tex.magFilter = LinearFilter;
-    tex.repeat.set(1, 1);
-  });
-  displacementMaps.forEach((tex) => {
-    tex.wrapS = tex.wrapT = ClampToEdgeWrapping;
-    tex.minFilter = tex.magFilter = LinearFilter;
-    tex.repeat.set(1, 1);
-  });
+  // Enhanced mobile detection
+  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Progressive loading state
+  const [loadedTiles, setLoadedTiles] = useState(0);
+  const [textures, setTextures] = useState<Texture[]>([]);
+  const [displacementMaps, setDisplacementMaps] = useState<Texture[]>([]);
+  
+  // Progressive loading effect
+  useEffect(() => {
+    const loadTile = async (index: number) => {
+      try {
+        // Load texture and displacement map for this tile
+        const textureLoader = new TextureLoader();
+        const texture = await new Promise<Texture>((resolve, reject) => {
+          textureLoader.load(
+            `${import.meta.env.BASE_URL}images/road/road_${index + 1}.jpg`,
+            resolve,
+            undefined,
+            reject
+          );
+        });
+        
+        const displacementMap = await new Promise<Texture>((resolve, reject) => {
+          textureLoader.load(
+            `${import.meta.env.BASE_URL}images/road/road_${index + 1}_height.webp`,
+            resolve,
+            undefined,
+            reject
+          );
+        });
+        
+        // Set texture properties
+        texture.wrapS = texture.wrapT = ClampToEdgeWrapping;
+        texture.minFilter = texture.magFilter = LinearFilter;
+        texture.repeat.set(1, 1);
+        
+        displacementMap.wrapS = displacementMap.wrapT = ClampToEdgeWrapping;
+        displacementMap.minFilter = displacementMap.magFilter = LinearFilter;
+        displacementMap.repeat.set(1, 1);
+        
+        // Update state
+        setTextures(prev => {
+          const newTextures = [...prev];
+          newTextures[index] = texture;
+          return newTextures;
+        });
+        
+        setDisplacementMaps(prev => {
+          const newMaps = [...prev];
+          newMaps[index] = displacementMap;
+          return newMaps;
+        });
+        
+        setLoadedTiles(prev => prev + 1);
+        
+        console.log(`🛣️ [Floor] Tile ${index + 1} loaded (${isMobile ? 'mobile' : 'desktop'} optimized)`);
+        
+        // Load next tile after a short delay (progressive loading)
+        if (index < 3) {
+          setTimeout(() => loadTile(index + 1), isMobile ? 200 : 100);
+        }
+        
+      } catch (error) {
+        console.warn(`⚠️ [Floor] Failed to load tile ${index + 1}:`, error);
+        // Continue loading other tiles even if one fails
+        if (index < 3) {
+          setTimeout(() => loadTile(index + 1), 500);
+        }
+      }
+    };
+    
+    // Start loading first tile immediately
+    loadTile(0);
+  }, [isMobile]);
+  
+  // Initialize arrays
+  useEffect(() => {
+    setTextures(new Array(4).fill(null));
+    setDisplacementMaps(new Array(4).fill(null));
+  }, []);
 
   // Each tile is 37.5 units (half of 75) to form a 2x2 grid
   const tileSize = 37.5;
@@ -46,21 +100,41 @@ export const Floor = () => {
 
   return (
     <group>
-      {textures.map((texture, i) => (
-        <Plane
-          key={i}
-          args={[tileSize + overlap, tileSize + overlap, 256, 256]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={positions[i]}
-          receiveShadow
-        >
-          <meshStandardMaterial
-            map={texture}
-            displacementMap={displacementMaps[i]}
-            displacementScale={3}
+      {textures.map((texture, i) => {
+        // Only render tile if both texture and displacement map are loaded
+        if (!texture || !displacementMaps[i]) {
+          return null;
+        }
+        
+        return (
+          <Plane
+            key={i}
+            args={[tileSize + overlap, tileSize + overlap, isMobile ? 64 : 256, isMobile ? 64 : 256]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={positions[i]}
+            receiveShadow
+          >
+            <meshStandardMaterial
+              map={texture}
+              displacementMap={displacementMaps[i]}
+              displacementScale={isMobile ? 1.5 : 3} // Reduced displacement on mobile
+            />
+          </Plane>
+        );
+      })}
+      
+      {/* Loading indicator for debugging */}
+      {loadedTiles < 4 && (
+        <mesh position={[0, 0, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial 
+            color="white" 
+            transparent 
+            opacity={0.1}
+            visible={false} // Hidden by default, can be enabled for debugging
           />
-        </Plane>
-      ))}
+        </mesh>
+      )}
     </group>
   );
 };

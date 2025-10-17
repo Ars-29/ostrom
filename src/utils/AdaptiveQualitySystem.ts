@@ -131,9 +131,14 @@ export class AdaptiveQualitySystem {
   private calculateOptimalSettings(): QualitySettings {
     const { isMobile, isTablet, memoryGB, cores, effectiveType } = this.capabilities;
     
-    // Enhanced mobile detection - force low quality on mobile devices
+    // Enhanced mobile detection - less aggressive optimization
     if (isMobile) {
-      this.qualityLevel = 'low';
+      // Only force low quality on very low-end devices
+      if (memoryGB < 2 || cores < 2 || effectiveType === 'slow-2g') {
+        this.qualityLevel = 'low';
+      } else {
+        this.qualityLevel = 'medium'; // Default to medium for most mobile devices
+      }
     } else if (isTablet || memoryGB < 4 || cores < 4 || effectiveType === 'slow-2g' || effectiveType === '2g') {
       this.qualityLevel = 'low';
     } else if (memoryGB < 8 || cores < 6 || effectiveType === '3g') {
@@ -142,18 +147,18 @@ export class AdaptiveQualitySystem {
       this.qualityLevel = 'high';
     }
     
-    // Quality settings based on level - Mobile-optimized defaults
+    // Quality settings based on level - Less aggressive mobile defaults
     const settings: QualitySettings = {
-      shadows: false,
-      antialias: false,
-      dpr: isMobile ? [0.5, 1.5] as [number, number] : [0.5, 1] as [number, number], // Cap DPR on mobile
-      farPlane: isMobile ? 100 : 1000, // Much shorter far plane on mobile
-      fov: isMobile ? 60 : 75, // Smaller FOV on mobile
-      postProcessing: false,
+      shadows: isMobile ? false : true, // Allow shadows on desktop
+      antialias: isMobile ? false : true, // Allow antialiasing on desktop
+      dpr: isMobile ? [0.5, 2] as [number, number] : [0.5, 2] as [number, number], // Allow higher DPR
+      farPlane: isMobile ? 500 : 1000, // Less aggressive far plane reduction
+      fov: isMobile ? 65 : 75, // Less aggressive FOV reduction
+      postProcessing: false, // Disable by default, enable in high quality
       effectQuality: 'low' as const,
-      textureQuality: 'low' as const,
-      particleCount: isMobile ? 10 : 15, // Fewer particles on mobile
-      targetFPS: isMobile ? 30 : 30,
+      textureQuality: 'medium' as const, // Better texture quality by default
+      particleCount: isMobile ? 20 : 30, // More particles allowed
+      targetFPS: isMobile ? 30 : 60, // Higher target FPS on desktop
       adaptiveQuality: true
     };
     

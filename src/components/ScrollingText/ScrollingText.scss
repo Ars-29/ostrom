@@ -1,6 +1,6 @@
 .scrolling-text-container {
   position: fixed;
-  left: 10%;
+  left: 5%; /* Moved slightly left to align with the background */
   top: 25%;
   width: 50%;
   height: 50%;
@@ -21,18 +21,18 @@
 
 .scrolling-text-background {
   position: fixed;
-  left: -50px;
+  left: -150px; /* Moved further left to better cover the text */
   top: calc(50% - 300px);
   width: 600px;
   height: 600px;
   z-index: 999; /* Behind the container */
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 65%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 70%); /* Increased opacity and coverage */
   opacity: 0;
   transition: 0.6s ease-in-out 1s;
   pointer-events: none;
 
   &.visible {
-    opacity: 0.6;
+    opacity: 0.8; /* Increased opacity for better text visibility */
   }
 }
 
@@ -48,5 +48,7 @@
   font-size: 1.5rem;
   line-height: 2.5rem;
   color: #000;
+  font-weight: 600; /* Increased font weight for better visibility */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); /* Added subtle white text shadow for contrast */
   pointer-events: none;
 }

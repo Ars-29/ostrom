@@ -1,6 +1,6 @@
-import React, { useMemo, useState, memo, useCallback } from 'react';
+import React, { useMemo, useState, memo } from 'react';
 import { TextureLoader, ShaderMaterial, DoubleSide } from 'three';
-import { useLoader, useFrame, useThree } from '@react-three/fiber';
+import { useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import LabelInfo from './LabelInfo';
 import { useOverlayImage } from '../contexts/OverlayImageContext';
@@ -151,112 +151,63 @@ const DynamicSprite: React.FC<DynamicSpriteProps> = memo(({
     });
   }, [color, loadedTextureColor, maskTexture, progress, alpha]);
 
-  // Optimized useFrame with performance optimizations (MOBILE ONLY)
-  const isMobileDevice = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
-  if (isMobileDevice) {
-    useOptimizedFrame(() => {
-      if (!active) return;
-      
-      // Mobile optimization: Skip expensive animations and calculations
-      if (isMobileDevice || isTouchDevice) {
-        // Direct material updates without React state changes
-        if (material) {
-          material.uniforms.uProgress.value = 1;
-          material.uniforms.uAlpha.value = alpha;
-        }
-        
-        // Skip billboard calculations on mobile for performance
-        if (billboard && groupRef.current && camera && !isMobileDevice) {
-          groupRef.current.lookAt(camera.position);
-        }
-        return;
-      }
-      
-      // Desktop behavior: animate based on hover
-      const animationSpeed = 0.015; // Slightly slower for more dramatic effect
-      
-      if (isOver && progress < 1) {
-        setProgress((prev) => {
-          const diff = 1 - prev;
-          return prev + diff * animationSpeed * 2; // Faster ease-in
-        });
-      } else if (!isOver && progress > 0) {
-        setProgress((prev) => {
-          return prev - animationSpeed;
-        });
-      }
-      
+  // Optimized useFrame with performance optimizations
+  useOptimizedFrame(() => {
+    if (!active) return;
+    
+    // Mobile optimization: Skip expensive animations and calculations
+    if (isMobile || isTouchDevice) {
+      // Direct material updates without React state changes
       if (material) {
-        material.uniforms.uProgress.value = progress;
+        material.uniforms.uProgress.value = 1;
         material.uniforms.uAlpha.value = alpha;
       }
-
-      // Billboard effect (only on desktop)
-      if (billboard && groupRef.current && camera && !isMobileDevice) {
+      
+      // Skip billboard calculations on mobile for performance
+      if (billboard && groupRef.current && camera && !isMobile) {
         groupRef.current.lookAt(camera.position);
       }
-    }, [active, isMobileDevice, isTouchDevice, material, alpha, billboard, groupRef, camera, isOver, progress]);
-  } else {
-    // Desktop - use standard useFrame for better performance
-    useFrame(() => {
-      if (!active) return;
-      
-      // Desktop behavior: animate based on hover
-      const animationSpeed = 0.015;
-      
-      if (isOver && progress < 1) {
-        setProgress((prev) => {
-          const diff = 1 - prev;
-          return prev + diff * animationSpeed * 2;
-        });
-      } else if (!isOver && progress > 0) {
-        setProgress((prev) => {
-          return prev - animationSpeed;
-        });
-      }
-      
-      if (material) {
-        material.uniforms.uProgress.value = progress;
-        material.uniforms.uAlpha.value = alpha;
-      }
-
-      // Billboard effect
-      if (billboard && groupRef.current && camera) {
-        groupRef.current.lookAt(camera.position);
-      }
-    });
-  }
-
-  const onMouseEnter = isMobileDevice ? useOptimizedCallback(() => {
-    if (!isTouchDevice) {
-      setIsOver(true);
+      return;
     }
-  }, [isTouchDevice]) : useCallback(() => {
+    
+    // Desktop behavior: animate based on hover
+    const animationSpeed = 0.015; // Slightly slower for more dramatic effect
+    
+    if (isOver && progress < 1) {
+      setProgress((prev) => {
+        const diff = 1 - prev;
+        return prev + diff * animationSpeed * 2; // Faster ease-in
+      });
+    } else if (!isOver && progress > 0) {
+      setProgress((prev) => {
+        return prev - animationSpeed;
+      });
+    }
+    
+    if (material) {
+      material.uniforms.uProgress.value = progress;
+      material.uniforms.uAlpha.value = alpha;
+    }
+
+    // Billboard effect (only on desktop)
+    if (billboard && groupRef.current && camera && !isMobile) {
+      groupRef.current.lookAt(camera.position);
+    }
+  }, [active, isMobile, isTouchDevice, material, alpha, billboard, groupRef, camera, isOver, progress]);
+
+  const onMouseEnter = useOptimizedCallback(() => {
     if (!isTouchDevice) {
       setIsOver(true);
     }
   }, [isTouchDevice]);
 
-  const onMouseLeave = isMobileDevice ? useOptimizedCallback(() => {
-    if (!isTouchDevice) {
-      setIsOver(false);
-    }
-  }, [isTouchDevice]) : useCallback(() => {
+  const onMouseLeave = useOptimizedCallback(() => {
     if (!isTouchDevice) {
       setIsOver(false);
     }
   }, [isTouchDevice]);
 
-  const handleSpriteClick = isMobileDevice ? useOptimizedCallback(() => {
-    if (label) {
-      playEffect('click');
-      if (label.imageUrl) {
-        openImage(label.imageUrl, label.text);
-      }
-      markClicked(label.scene, label.id);
-    }
-  }, [label, playEffect, openImage, markClicked]) : useCallback(() => {
+  const handleSpriteClick = useOptimizedCallback(() => {
     if (label) {
       playEffect('click');
       if (label.imageUrl) {

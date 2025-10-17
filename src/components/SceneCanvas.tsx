@@ -4,7 +4,7 @@ import { EffectComposer, Noise, Sepia, Vignette } from '@react-three/postprocess
 import { CameraRig } from './CameraRig'
 import { Lights } from './Lights'
 import SceneManager from './SceneManager'
-import DeviceAwareSky from './DeviceAwareSky'
+import MainSky from './MainSky'
 import FPSCamera from './FPSCamera'
 import { useScene } from '../contexts/SceneContext';
 import CameraEditor from './CameraEditor';
@@ -26,47 +26,38 @@ export const SceneCanvas: FC<SceneCanvasProps> = ({debugMode}) => {
   // Use adaptive quality system
   const { qualitySettings, qualityLevel, performanceStats } = useAdaptiveQuality();
 
-  // Initialize enhanced performance monitoring, WebGL context optimizer, and scroll optimizer (MOBILE ONLY)
+  // Initialize enhanced performance monitoring, WebGL context optimizer, and scroll optimizer
   useEffect(() => {
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (!isMobile) {
-      // Desktop - skip optimization systems to prevent lag
-      console.log('🖥️ [SceneCanvas] Desktop detected - skipping optimization systems for better performance');
-      return;
-    }
-
-    // Mobile only - initialize optimization systems
     const performanceMonitor = initializeEnhancedPerformanceMonitoring();
     
-    // Initialize WebGL context optimizer
+    // Initialize WebGL context optimizer with less aggressive settings
     const webglOptimizer = initializeWebGLContextOptimizer({
       enableContextLossHandling: true,
       enableContextRestoreHandling: true,
-      enableMobileOptimizations: true,
+      enableMobileOptimizations: false, // Disable aggressive mobile optimizations
       enableMemoryManagement: true,
-      enableTextureCompression: true
+      enableTextureCompression: false // Disable texture compression temporarily
     });
 
-    // Initialize advanced scroll optimizer
+    // Initialize advanced scroll optimizer with less aggressive settings
     const scrollOptimizer = initializeAdvancedScrollOptimizer({
       enableScrollThrottling: true,
       throttleInterval: 16,
-      enableScrollPrediction: true,
-      enableScrollCaching: true,
+      enableScrollPrediction: false, // Disable prediction to reduce overhead
+      enableScrollCaching: false, // Disable caching to reduce memory usage
       enableScrollBatching: true,
       enableScrollDebouncing: true,
       debounceDelay: 100,
-      enableScrollVirtualization: true,
-      enableScrollLazyLoading: true,
-      enableScrollIntersectionObserver: true,
-      enableScrollPerformanceMonitoring: true
+      enableScrollVirtualization: false, // Disable virtualization
+      enableScrollLazyLoading: false, // Disable lazy loading
+      enableScrollIntersectionObserver: false, // Disable intersection observer
+      enableScrollPerformanceMonitoring: false // Disable performance monitoring
     });
 
-    // Set up context loss handlers
+    // Set up context loss handlers - Disable automatic reload
     webglOptimizer.onContextLoss(() => {
-      console.warn('WebGL context lost - reloading page');
-      window.location.reload();
+      console.warn('WebGL context lost - attempting recovery without reload');
+      // Don't reload automatically - let the app handle it gracefully
     });
 
     webglOptimizer.onContextRestore(() => {
@@ -74,7 +65,9 @@ export const SceneCanvas: FC<SceneCanvasProps> = ({debugMode}) => {
     });
     
     // Log initialization
-    console.log('📱 [SceneCanvas] Mobile optimization systems initialized');
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const emoji = isMobile ? '📱' : '🖥️';
+    console.log(`${emoji} [SceneCanvas] Performance monitoring initialized with reduced optimizations`);
     
     return () => {
       performanceMonitor.stopMonitoring();
@@ -83,28 +76,26 @@ export const SceneCanvas: FC<SceneCanvasProps> = ({debugMode}) => {
     };
   }, []);
 
-  // Enhanced mobile-optimized renderer settings
+  // Enhanced mobile-optimized renderer settings - Less aggressive
   const getRendererSettings = () => {
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
     return {
-      shadows: qualitySettings.shadows && !isMobile, // Disable shadows on mobile
-      dpr: isMobile ? Math.min(qualitySettings.dpr[1], 1.5) : qualitySettings.dpr[1], // Cap DPR on mobile
+      shadows: qualitySettings.shadows, // Use adaptive quality settings
+      dpr: qualitySettings.dpr[1], // Use adaptive quality settings
       camera: { 
-        fov: isMobile ? 60 : qualitySettings.fov, // Smaller FOV on mobile = less geometry
+        fov: qualitySettings.fov, // Use adaptive quality settings
         near: 0.1, 
-        far: isMobile ? 100 : qualitySettings.farPlane, // Shorter far plane on mobile
+        far: qualitySettings.farPlane, // Use adaptive quality settings
         position: [0, 2, 10] as [number, number, number] 
       },
       gl: { 
-        antialias: qualitySettings.antialias && !isMobile, // Disable antialiasing on mobile
+        antialias: qualitySettings.antialias, // Use adaptive quality settings
         powerPreference: 'high-performance' as const,
         stencil: false,
         depth: true,
         alpha: false,
-        preserveDrawingBuffer: false, // Save memory on mobile
-        failIfMajorPerformanceCaveat: isMobile, // Fail gracefully on weak devices
-        precision: isMobile ? 'lowp' : 'highp', // Lower precision on mobile
+        preserveDrawingBuffer: false, // Keep memory optimization
+        failIfMajorPerformanceCaveat: false, // Don't fail on weak devices
+        precision: 'highp', // Use high precision by default
       }
     };
   };
@@ -121,22 +112,20 @@ export const SceneCanvas: FC<SceneCanvasProps> = ({debugMode}) => {
       className='app-canvas'
     >
       <Lights debug={debugMode} />
-      <DeviceAwareSky scene={currentScene} />
+      <MainSky scene={currentScene} />
       <Suspense fallback={null}>
         {debugMode ? <FPSCamera disabled={editorDragging} /> : <CameraRig />}
         {/* CameraEditor only in debug mode */}
         {debugMode && false && <CameraEditor onDraggingChange={setEditorDragging} onExportReady={setExportFn} />}
         
-        {/* Instanced Sprite Manager for optimization (MOBILE ONLY) */}
-        {(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) && (
-          <InstancedSpriteManager 
-            enableInstancedRendering={true}
-            enableFrustumCulling={true}
-            enableVirtualScrolling={true}
-            enablePerformanceMonitoring={true}
-            updateInterval={33} // 30fps on mobile
-          />
-        )}
+        {/* Instanced Sprite Manager for optimization */}
+        <InstancedSpriteManager 
+          enableInstancedRendering={true}
+          enableFrustumCulling={true}
+          enableVirtualScrolling={true}
+          enablePerformanceMonitoring={true}
+          updateInterval={(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) ? 33 : 16} // 30fps on mobile, 60fps on desktop
+        />
         
         {/* Use SceneManager for dynamic scene loading */}
         <SceneManager debugMode={debugMode} />

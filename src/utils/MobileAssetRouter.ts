@@ -28,7 +28,7 @@ export class MobileAssetRouter {
 
   constructor(config: Partial<AssetRouterConfig> = {}) {
     this.config = {
-      enableMobileAssets: true, // Re-enabled with fallback support
+      enableMobileAssets: true, // Re-enable mobile asset routing for section-2 optimization
       enableAdaptiveQuality: true,
       enableLogging: true,
       fallbackToDesktop: true,
