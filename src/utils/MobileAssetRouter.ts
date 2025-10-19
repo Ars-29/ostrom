@@ -100,9 +100,15 @@ export class MobileAssetRouter {
 
     let optimizedPath = originalPath;
 
-    // Only apply mobile optimizations if enabled and device is mobile
-    if (this.config.enableMobileAssets && this.capabilities.isMobile) {
-      optimizedPath = this.getMobileOptimizedPath(originalPath);
+    // Apply optimizations for both mobile and desktop
+    if (this.config.enableMobileAssets) {
+      if (this.capabilities.isMobile) {
+        // Mobile optimization
+        optimizedPath = this.getMobileOptimizedPath(originalPath);
+      } else {
+        // Desktop optimization - use original assets but with better caching
+        optimizedPath = this.getDesktopOptimizedPath(originalPath);
+      }
     }
 
     // Cache the result
@@ -117,6 +123,17 @@ export class MobileAssetRouter {
     });
 
     return optimizedPath;
+  }
+
+  /**
+   * Get desktop-optimized asset path (original quality with better caching)
+   */
+  private getDesktopOptimizedPath(originalPath: string): string {
+    // For desktop, use original assets but ensure proper path structure
+    if (originalPath.startsWith('images/')) {
+      return originalPath; // Use original desktop assets
+    }
+    return originalPath;
   }
 
   /**

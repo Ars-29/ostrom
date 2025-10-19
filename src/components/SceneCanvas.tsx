@@ -12,7 +12,7 @@ import { useAdaptiveQuality } from '../hooks/useAdaptiveQuality';
 import { initializeEnhancedPerformanceMonitoring } from '../utils/EnhancedPerformanceMonitor';
 import InstancedSpriteManager from './InstancedSpriteManager';
 import { initializeWebGLContextOptimizer } from '../utils/WebGLContextOptimizer';
-import { initializeAdvancedScrollOptimizer } from '../utils/AdvancedScrollOptimizer';
+// import { initializeAdvancedScrollOptimizer } from '../utils/AdvancedScrollOptimizer'; // Disabled for faster startup
 
 interface SceneCanvasProps {
   debugMode?: boolean;
@@ -26,42 +26,30 @@ export const SceneCanvas: FC<SceneCanvasProps> = ({debugMode}) => {
   // Use adaptive quality system
   const { qualitySettings, qualityLevel, performanceStats } = useAdaptiveQuality();
 
-  // Initialize enhanced performance monitoring, WebGL context optimizer, and scroll optimizer
+  // Fast initialization - minimal overhead for better startup performance
   useEffect(() => {
+    // Only initialize essential optimizations for faster startup
     const performanceMonitor = initializeEnhancedPerformanceMonitoring();
     
-    // Initialize WebGL context optimizer with less aggressive settings
+    // Minimal WebGL context optimizer
     const webglOptimizer = initializeWebGLContextOptimizer({
       enableContextLossHandling: true,
       enableContextRestoreHandling: true,
-      enableMobileOptimizations: false, // Disable aggressive mobile optimizations
-      enableMemoryManagement: true,
-      enableTextureCompression: false // Disable texture compression temporarily
+      enableMobileOptimizations: false,
+      enableMemoryManagement: false, // Disable for faster startup
+      enableTextureCompression: false
     });
 
-    // Initialize advanced scroll optimizer with less aggressive settings
-    const scrollOptimizer = initializeAdvancedScrollOptimizer({
-      enableScrollThrottling: true,
-      throttleInterval: 16,
-      enableScrollPrediction: false, // Disable prediction to reduce overhead
-      enableScrollCaching: false, // Disable caching to reduce memory usage
-      enableScrollBatching: true,
-      enableScrollDebouncing: true,
-      debounceDelay: 100,
-      enableScrollVirtualization: false, // Disable virtualization
-      enableScrollLazyLoading: false, // Disable lazy loading
-      enableScrollIntersectionObserver: false, // Disable intersection observer
-      enableScrollPerformanceMonitoring: false // Disable performance monitoring
-    });
+    // Disable scroll optimizer for faster initial load
+    // const scrollOptimizer = initializeAdvancedScrollOptimizer({...});
 
     // Set up context loss handlers - Disable automatic reload
     webglOptimizer.onContextLoss(() => {
       console.warn('WebGL context lost - attempting recovery without reload');
-      // Don't reload automatically - let the app handle it gracefully
     });
 
     webglOptimizer.onContextRestore(() => {
-      console.log('WebGL context restored - reinitializing');
+      console.log('WebGL context restored successfully');
     });
     
     // Log initialization
@@ -72,7 +60,7 @@ export const SceneCanvas: FC<SceneCanvasProps> = ({debugMode}) => {
     return () => {
       performanceMonitor.stopMonitoring();
       webglOptimizer.cleanup();
-      scrollOptimizer.cleanup();
+      // scrollOptimizer.cleanup(); // Disabled for faster startup
     };
   }, []);
 

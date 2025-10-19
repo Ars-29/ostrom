@@ -8,6 +8,7 @@ export class ServiceWorkerManager {
   private static instance: ServiceWorkerManager;
   private registration: ServiceWorkerRegistration | null = null;
   private isSupported: boolean = false;
+  private hasCriticalUpdate: boolean = false;
 
   static getInstance(): ServiceWorkerManager {
     if (!ServiceWorkerManager.instance) {
@@ -45,7 +46,14 @@ export class ServiceWorkerManager {
       // Handle controller change
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         console.log('🔄 [ServiceWorkerManager] Service Worker controller changed');
-        window.location.reload();
+        // Don't reload automatically - let user continue browsing
+        // Only reload if there's a critical update
+        if (this.hasCriticalUpdate) {
+          console.log('🚨 [ServiceWorkerManager] Critical update detected, reloading...');
+          window.location.reload();
+        } else {
+          console.log('✅ [ServiceWorkerManager] Service Worker updated in background');
+        }
       });
 
       return true;

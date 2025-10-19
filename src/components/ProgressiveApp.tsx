@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import App from '../App';
-import AssetPreloader from '../utils/AssetPreloader';
+// import AssetPreloader from '../utils/AssetPreloader'; // Removed for faster loading
 import { performanceMonitor } from '../utils/PerformanceMonitor';
 
 interface ProgressiveAppProps {
@@ -29,47 +29,11 @@ export const ProgressiveApp: React.FC<ProgressiveAppProps> = () => {
     
     globalLoadingStarted = true;
 
-    // Check if critical assets are already cached
+    // Fast loading - skip complex cache checking for better performance
     const checkCacheFirst = async () => {
-      const criticalAssets = [
-        '/images/logo.svg',
-        '/images/background.webp', 
-        '/images/divider.png',
-        '/fonts/bellefair/Bellefair-Regular.woff2',
-        '/fonts/playground/PPPlayground-Variable.woff2'
-      ];
-
-      try {
-        const cachePromises = criticalAssets.map(async (asset) => {
-          const response = await caches.match(asset);
-          return !!response;
-        });
-
-        const cacheResults = await Promise.all(cachePromises);
-        const cachedCount = cacheResults.filter(Boolean).length;
-        
-        console.log(`📦 [ProgressiveApp] Cache check: ${cachedCount}/${criticalAssets.length} assets cached`);
-        
-        // If most assets are cached, skip loading state
-        if (cachedCount >= criticalAssets.length * 0.8) {
-          console.log('✅ [ProgressiveApp] Most assets cached, skipping loading state');
-          setHasLoaded(true);
-          
-          // Mark root as loaded immediately
-          const rootElement = document.getElementById('root');
-          if (rootElement) {
-            rootElement.classList.add('loaded');
-          }
-          
-          performanceMonitor.markAppReady();
-          return true; // Assets already cached
-        }
-        
-        return false; // Need to load assets
-      } catch (error) {
-        console.log('⚠️ [ProgressiveApp] Cache check failed, proceeding with loading');
-        return false;
-      }
+      // Skip complex cache checking to improve initial load speed
+      console.log('🚀 [ProgressiveApp] Fast loading mode - skipping cache check');
+      return false; // Always proceed with loading for consistent experience
     };
 
     const loadCriticalAssets = async () => {
@@ -79,61 +43,34 @@ export const ProgressiveApp: React.FC<ProgressiveAppProps> = () => {
       // Show loading state only if we need to load assets
       
       try {
-        // Wait for fonts to be ready
-        console.log('📝 [ProgressiveApp] Waiting for fonts to be ready...');
-        await document.fonts.ready;
-        const fontsReadyTime = performance.now();
-        console.log(`✅ [ProgressiveApp] Fonts ready in ${(fontsReadyTime - startTime).toFixed(2)}ms`);
+        // Fast loading - minimal delay
+        console.log('⚡ [ProgressiveApp] Fast loading mode - minimal assets');
         
-        performanceMonitor.markFontsReady();
-
-        // Use AssetPreloader for better asset management
-        const preloader = new AssetPreloader({
-          onProgress: (progress) => {
-            console.log(`📈 [ProgressiveApp] Asset loading progress: ${Math.round(progress)}%`);
-          },
-          onComplete: () => {
-            const completeTime = performance.now();
-            const totalTime = completeTime - startTime;
-            console.log(`🎉 [ProgressiveApp] All critical assets loaded in ${totalTime.toFixed(2)}ms`);
-            
-            performanceMonitor.markCriticalAssetsLoaded();
-            
-          setHasLoaded(true); // Mark as loaded to prevent duplicates
-          
-          // Add loaded class to root for smooth transition
-            const rootElement = document.getElementById('root');
-            if (rootElement) {
-              rootElement.classList.add('loaded');
-              console.log('✨ [ProgressiveApp] Root element marked as loaded');
-            }
-
-            // Mark app as ready
-            setTimeout(() => {
-              console.log('✅ [ProgressiveApp] App ready!');
-              performanceMonitor.markAppReady();
-            }, 100);
-          },
-          onError: (error) => {
-            console.error('❌ [ProgressiveApp] Error loading critical assets:', error);
-            setHasLoaded(true); // Mark as loaded even on error to prevent retries
-          }
-        });
-
-        // Add critical assets
-        const criticalAssets = [
-          { src: '/images/logo.svg', type: 'image' as const, priority: 'critical' as const },
-          { src: '/images/background.webp', type: 'image' as const, priority: 'critical' as const },
-          { src: '/images/divider.png', type: 'image' as const, priority: 'critical' as const },
-          { src: '/fonts/bellefair/Bellefair-Regular.woff2', type: 'font' as const, priority: 'critical' as const },
-          { src: '/fonts/playground/PPPlayground-Variable.woff2', type: 'font' as const, priority: 'critical' as const },
-        ];
+        // Just wait for fonts briefly, don't block on assets
+        const fontPromise = document.fonts.ready;
+        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 500)); // Max 500ms wait
         
-        console.log(`📦 [ProgressiveApp] Adding ${criticalAssets.length} critical assets to preloader`);
-        preloader.addAssets(criticalAssets);
+        await Promise.race([fontPromise, timeoutPromise]);
+        
+        const endTime = performance.now();
+        const loadTime = endTime - startTime;
+        console.log(`⚡ [ProgressiveApp] Fast loading complete in ${loadTime.toFixed(2)}ms`);
+        
+        // Mark as loaded immediately
+        setHasLoaded(true);
+        
+        // Add loaded class to root for smooth transition
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+          rootElement.classList.add('loaded');
+          console.log('✨ [ProgressiveApp] Root element marked as loaded');
+        }
 
-        console.log('🔄 [ProgressiveApp] Starting asset preloading...');
-        await preloader.preload();
+        // Mark app as ready quickly
+        setTimeout(() => {
+          console.log('✅ [ProgressiveApp] App ready!');
+          performanceMonitor.markAppReady();
+        }, 50); // Reduced delay
 
       } catch (error) {
         console.error('❌ [ProgressiveApp] Error loading critical assets:', error);
@@ -141,15 +78,14 @@ export const ProgressiveApp: React.FC<ProgressiveAppProps> = () => {
       }
     };
 
-    // Check cache first, then load if needed
-    // Small delay to ensure Service Worker is ready
+    // Fast loading - minimal delay
     setTimeout(() => {
       checkCacheFirst().then((assetsCached) => {
         if (!assetsCached) {
           loadCriticalAssets();
         }
       });
-    }, 50);
+    }, 10); // Reduced delay for faster initial load
   }, [hasLoaded]);
 
   useEffect(() => {
