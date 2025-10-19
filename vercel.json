@@ -15,7 +15,7 @@
       "dest": "/index.html"
     }
   ],
-  "regions": ["fra1", "par1"],
+  "regions": ["fra1"],
   "env": {
     "NODE_ENV": "production"
   },
