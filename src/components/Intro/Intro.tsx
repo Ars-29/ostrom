@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './Intro.scss';
 import introVideo from '/videos/intro.mp4';
-import introMobileVideo from '/mobile-assets/videos/intro_mobile.mp4';
+import introMobileVideo from '/mobile-assets/videos/intro_mobile_ultra.mp4';
 import { useSound } from '../../contexts/SoundContext';
 
 interface IntroProps { hasStarted: boolean; }
