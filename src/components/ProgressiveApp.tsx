@@ -28,6 +28,14 @@ export const ProgressiveApp: React.FC<ProgressiveAppProps> = () => {
     }
     
     globalLoadingStarted = true;
+    
+    // Ensure root is visible immediately
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      rootElement.classList.remove('loading');
+      rootElement.classList.add('loaded');
+      console.log('✨ [ProgressiveApp] Root element made visible immediately');
+    }
 
     // Fast loading - skip complex cache checking for better performance
     const checkCacheFirst = async () => {
@@ -59,11 +67,12 @@ export const ProgressiveApp: React.FC<ProgressiveAppProps> = () => {
         // Mark as loaded immediately
         setHasLoaded(true);
         
-        // Add loaded class to root for smooth transition
+        // Ensure root is visible (already done above, but double-check)
         const rootElement = document.getElementById('root');
         if (rootElement) {
+          rootElement.classList.remove('loading');
           rootElement.classList.add('loaded');
-          console.log('✨ [ProgressiveApp] Root element marked as loaded');
+          console.log('✨ [ProgressiveApp] Root element confirmed as loaded');
         }
 
         // Mark app as ready quickly

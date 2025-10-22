@@ -30,8 +30,10 @@ export interface TouchState {
   touchStartPosition: { x: number; y: number };
   touchCurrentPosition: { x: number; y: number };
   touchVelocity: { x: number; y: number };
-  gestureType: 'tap' | 'swipe' | 'pinch' | 'none';
+  gestureType: 'tap' | 'swipe' | 'pinch' | 'scroll' | 'none';
   gestureDirection: 'up' | 'down' | 'left' | 'right' | 'none';
+  isScrolling: boolean;
+  scrollThreshold: number;
 }
 
 export class TouchOptimizer {
@@ -56,10 +58,33 @@ export class TouchOptimizer {
       touchCurrentPosition: { x: 0, y: 0 },
       touchVelocity: { x: 0, y: 0 },
       gestureType: 'none',
-      gestureDirection: 'none'
+      gestureDirection: 'none',
+      isScrolling: false,
+      scrollThreshold: 30
     };
     
     console.log('📱 [TouchOptimizer] Initialized for', this.isMobile ? 'mobile' : 'desktop');
+  }
+  
+  /**
+   * Detect iOS 17+ for stricter touch handling
+   */
+  private detectIOS17Plus(): boolean {
+    const userAgent = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/i.test(userAgent);
+    
+    if (!isIOS) return false;
+    
+    // Detect iOS version from user agent
+    const match = userAgent.match(/OS (\d+)_/);
+    if (match) {
+      const version = parseInt(match[1], 10);
+      return version >= 17;
+    }
+    
+    // Fallback: assume newer devices are iOS 17+
+    const isNewerDevice = /iPhone 1[4-5]|iPad Pro.*202[2-4]/i.test(userAgent);
+    return isNewerDevice;
   }
   
   private detectMobile(): boolean {
@@ -139,8 +164,12 @@ export class TouchOptimizer {
     // Detect gesture type
     this.detectGesture();
     
-    // Prevent scrolling during certain gestures
-    if (this.config.enableTouchPrevention && this.touchState.gestureType !== 'none') {
+    // Only prevent default for non-scroll gestures on newer iOS
+    const isIOS17Plus = this.detectIOS17Plus();
+    if (this.config.enableTouchPrevention && 
+        this.touchState.gestureType !== 'scroll' && 
+        this.touchState.gestureType !== 'none' &&
+        !isIOS17Plus) {
       event.preventDefault();
     }
     
@@ -175,6 +204,7 @@ export class TouchOptimizer {
     this.touchState.isTouching = false;
     this.touchState.gestureType = 'none';
     this.touchState.gestureDirection = 'none';
+    this.touchState.isScrolling = false;
     
     console.log('👆 [TouchOptimizer] Touch end:', this.touchState.gestureType);
     return { ...this.touchState };
@@ -208,12 +238,28 @@ export class TouchOptimizer {
     const deltaY = this.touchState.touchCurrentPosition.y - this.touchState.touchStartPosition.y;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
+    // Check if this is a scrolling gesture
+    const isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > this.touchState.scrollThreshold;
+    const isHorizontalScroll = Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > this.touchState.scrollThreshold;
+    
     // Determine gesture type
     if (distance < 10) {
       this.touchState.gestureType = 'tap';
       this.touchState.gestureDirection = 'none';
+      this.touchState.isScrolling = false;
+    } else if (isVerticalScroll || isHorizontalScroll) {
+      this.touchState.gestureType = 'scroll';
+      this.touchState.isScrolling = true;
+      
+      // Determine scroll direction
+      if (isVerticalScroll) {
+        this.touchState.gestureDirection = deltaY > 0 ? 'down' : 'up';
+      } else {
+        this.touchState.gestureDirection = deltaX > 0 ? 'right' : 'left';
+      }
     } else if (distance > this.config.swipeThreshold) {
       this.touchState.gestureType = 'swipe';
+      this.touchState.isScrolling = false;
       
       // Determine swipe direction
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -224,6 +270,7 @@ export class TouchOptimizer {
     } else {
       this.touchState.gestureType = 'none';
       this.touchState.gestureDirection = 'none';
+      this.touchState.isScrolling = false;
     }
   }
   

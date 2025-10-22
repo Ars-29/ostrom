@@ -20,8 +20,6 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
   
   // Show button after delay
   useEffect(() => {
@@ -32,28 +30,15 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
     return () => clearTimeout(timer);
   }, [showDelay]);
   
-  // Handle scroll behavior and prevent clicks during scroll
+  // Handle scroll behavior for hiding/showing (simplified)
   useEffect(() => {
-    let scrollTimeout: number;
+    if (!hideOnScroll) return;
+    
+    let lastScrollY = 0;
     
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Set scrolling state to true
-      setIsScrolling(true);
-      
-      // Clear any existing timeout
-      clearTimeout(scrollTimeout);
-      
-      // Set scrolling to false after scroll stops
-      scrollTimeout = setTimeout(() => {
-        setIsScrolling(false);
-      }, 150);
-      
-      if (!hideOnScroll) return;
-      
       const scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
-      setLastScrollY(currentScrollY);
       
       // Only hide when scrolling down very fast, otherwise keep visible
       if (scrollDirection === 'down' && currentScrollY > 200 && (currentScrollY - lastScrollY) > 50) {
@@ -61,14 +46,13 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
       } else if (scrollDirection === 'up' || currentScrollY < 200) {
         setIsVisible(true);
       }
+      
+      lastScrollY = currentScrollY;
     };
     
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      clearTimeout(scrollTimeout);
-    };
-  }, [hideOnScroll, lastScrollY]);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hideOnScroll]);
   
   // Get position styles
   const getPositionStyles = (): React.CSSProperties => {
@@ -122,7 +106,7 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
     background: 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 50%, #0d0d0d 100%)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     boxShadow: 'none',
-    cursor: isScrolling ? 'default' : 'pointer',
+    cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -130,9 +114,7 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
     fontSize: '24px',
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
-    pointerEvents: isScrolling ? 'none' : 'auto',
-    opacity: isScrolling ? 0.7 : 1,
-    ...(isHovered && !isScrolling && {
+    ...(isHovered && {
       transform: 'translateY(-2px)'
     }),
     ...style
@@ -194,29 +176,11 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
   };
   
   const handleClick = () => {
-    // Prevent clicks during scrolling
-    if (isScrolling) {
-      console.log('Click prevented during scroll');
-      return;
-    }
-    
-    // Add small delay to prevent accidental triggers during scroll
-    setTimeout(() => {
-      if (onClick) {
-        onClick();
-      } else {
-        // No default action - just log for now
-        console.log('Contact button clicked - no default action');
-      }
-    }, 100);
-    
-    // Add click animation
-    const button = document.querySelector('.floating-contact-button') as HTMLElement;
-    if (button) {
-      button.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        button.style.transform = 'scale(1)';
-      }, 150);
+    if (onClick) {
+      onClick();
+    } else {
+      // No default action - just log for now
+      console.log('Contact button clicked - no default action');
     }
   };
   
@@ -245,6 +209,7 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
         style={getButtonStyles()}
         enableHapticFeedback={true}
         touchTargetSize={56}
+        deadzoneSize={16}
       >
         💬
       </TouchOptimizedButton>
@@ -266,19 +231,9 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
           isolation: isolate; /* Create new stacking context */
         }
         
-        .floating-contact-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-          transition: left 0.5s;
-        }
-        
-        .floating-contact-button:hover::before {
-          left: 100%;
+        /* Remove conflicting hover effects that cause blinking */
+        .floating-contact-button:hover {
+          transform: translateY(-2px);
         }
         
         .contact-tooltip::after {
