@@ -246,7 +246,63 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
         enableHapticFeedback={true}
         touchTargetSize={56}
       >
-        💬
+        <div style={{ 
+          width: '24px', 
+          height: '24px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          position: 'relative'
+        }}>
+          {/* Speech bubble background */}
+          <div style={{
+            width: '20px',
+            height: '16px',
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* Three dots */}
+            <div style={{
+              display: 'flex',
+              gap: '3px',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                width: '2px',
+                height: '2px',
+                backgroundColor: '#2c2c2c',
+                borderRadius: '50%'
+              }}></div>
+              <div style={{
+                width: '2px',
+                height: '2px',
+                backgroundColor: '#2c2c2c',
+                borderRadius: '50%'
+              }}></div>
+              <div style={{
+                width: '2px',
+                height: '2px',
+                backgroundColor: '#2c2c2c',
+                borderRadius: '50%'
+              }}></div>
+            </div>
+          </div>
+          {/* Speech bubble tail */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-2px',
+            left: '6px',
+            width: '0',
+            height: '0',
+            borderLeft: '4px solid transparent',
+            borderRight: '4px solid transparent',
+            borderTop: '6px solid #ffffff'
+          }}></div>
+        </div>
       </TouchOptimizedButton>
       
       {/* Enhanced styles */}
@@ -264,6 +320,13 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
           -webkit-user-select: none; /* Disable text selection */
           user-select: none;
           isolation: isolate; /* Create new stacking context */
+        }
+        
+        .floating-contact-button > div {
+          display: flex !important;
+          width: 24px !important;
+          height: 24px !important;
+          flex-shrink: 0;
         }
         
         .floating-contact-button::before {
@@ -305,6 +368,12 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
             width: 48px;
             height: 48px;
             font-size: 20px;
+          }
+          
+          .floating-contact-button > div {
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
           }
           
           .contact-tooltip {

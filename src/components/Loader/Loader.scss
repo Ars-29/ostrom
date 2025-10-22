@@ -57,7 +57,7 @@ body.no-scroll {
   left: calc(50% - 90px);
   width: 180px;
   height: 180px;
-  z-index: 2010; /* Ensure it stays above the fading container */
+  z-index: 2010; /* Ensure it stays above the header and fading container */
   transition: 1s ease-in-out;
   cursor: pointer;
   animation: rotateLogo 100s linear infinite;
@@ -74,13 +74,13 @@ body.no-scroll {
 
   &.move-to-corner {
     top: 15px;
-    left: 15px;
+    left: 70px; /* Moved closer to hamburger menu on mobile */
     width: 70px;
     height: 70px;
 
     @media screen and (min-width: 768px) {
       top: 25px;
-      left: 25px;
+      left: 75px; /* Moved closer to hamburger menu on desktop */
       width: 100px;
       height: 100px;    
     }
