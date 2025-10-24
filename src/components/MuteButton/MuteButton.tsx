@@ -15,6 +15,7 @@ const MuteButton: React.FC = () => {
       className="mute-toggle-btn"
       enableHapticFeedback={true}
       touchTargetSize={48}
+      deadzoneSize={12}
       style={{
         background: 'none',
         border: 'none',

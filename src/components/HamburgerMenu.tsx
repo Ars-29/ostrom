@@ -216,6 +216,7 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
          style={getButtonStyles()}
          enableHapticFeedback={true}
          touchTargetSize={48}
+         deadzoneSize={12}
        >
          <div style={getLineStyles(1)} />
          <div style={getLineStyles(2)} />
