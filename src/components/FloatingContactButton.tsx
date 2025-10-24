@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TouchOptimizedButton from './TouchOptimizedButton';
 
 interface FloatingContactButtonProps {
   onClick?: () => void;
   position?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
-  showDelay?: number;
-  hideOnScroll?: boolean;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -13,58 +11,22 @@ interface FloatingContactButtonProps {
 export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
   onClick,
   position = 'bottom-left',
-  showDelay = 3000, // Show after 3 seconds
-  hideOnScroll = false,
   className = '',
   style = {}
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   
-  // Show button after delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, showDelay);
-    
-    return () => clearTimeout(timer);
-  }, [showDelay]);
-  
-  // Handle scroll behavior for hiding/showing (simplified)
-  useEffect(() => {
-    if (!hideOnScroll) return;
-    
-    let lastScrollY = 0;
-    
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
-      
-      // Only hide when scrolling down very fast, otherwise keep visible
-      if (scrollDirection === 'down' && currentScrollY > 200 && (currentScrollY - lastScrollY) > 50) {
-        setIsVisible(false);
-      } else if (scrollDirection === 'up' || currentScrollY < 200) {
-        setIsVisible(true);
-      }
-      
-      lastScrollY = currentScrollY;
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [hideOnScroll]);
+  // Button is now always visible like hamburger menu
   
   // Get position styles
   const getPositionStyles = (): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
       position: 'fixed',
-      zIndex: 40, // Reduced from 1000 to prevent interference
+      zIndex: 1003, // Higher than hamburger (1002) and navbar (1000)
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      opacity: isVisible ? 1 : 0,
-      transform: isVisible 
-        ? (isHovered ? 'scale(1.1)' : 'scale(1)')
-        : 'scale(0.8)',
-      pointerEvents: isVisible ? 'auto' : 'none',
+      opacity: 1, // Always visible like hamburger
+      transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+      pointerEvents: 'auto', // Always interactive
       touchAction: 'manipulation' // Prevent double-tap zoom
     };
     
@@ -105,7 +67,7 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
     borderRadius: '50%',
     background: 'linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 50%, #0d0d0d 100%)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
-    boxShadow: 'none',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', // Add shadow for better visibility
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -114,8 +76,10 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
     fontSize: '24px',
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)', // Add blur effect to prevent text bleeding through
     ...(isHovered && {
-      transform: 'translateY(-2px)'
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.4)' // Enhanced shadow on hover
     }),
     ...style
   });
@@ -211,7 +175,63 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
         touchTargetSize={56}
         deadzoneSize={16}
       >
-        💬
+        <div style={{ 
+          width: '24px', 
+          height: '24px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          position: 'relative'
+        }}>
+          {/* Speech bubble background */}
+          <div style={{
+            width: '20px',
+            height: '16px',
+            backgroundColor: '#ffffff',
+            borderRadius: '8px',
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {/* Three dots */}
+            <div style={{
+              display: 'flex',
+              gap: '3px',
+              alignItems: 'center'
+            }}>
+              <div style={{
+                width: '2px',
+                height: '2px',
+                backgroundColor: '#2c2c2c',
+                borderRadius: '50%'
+              }}></div>
+              <div style={{
+                width: '2px',
+                height: '2px',
+                backgroundColor: '#2c2c2c',
+                borderRadius: '50%'
+              }}></div>
+              <div style={{
+                width: '2px',
+                height: '2px',
+                backgroundColor: '#2c2c2c',
+                borderRadius: '50%'
+              }}></div>
+            </div>
+          </div>
+          {/* Speech bubble tail */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-2px',
+            left: '6px',
+            width: '0',
+            height: '0',
+            borderLeft: '4px solid transparent',
+            borderRight: '4px solid transparent',
+            borderTop: '6px solid #ffffff'
+          }}></div>
+        </div>
       </TouchOptimizedButton>
       
       {/* Enhanced styles */}
@@ -260,6 +280,12 @@ export const FloatingContactButton: React.FC<FloatingContactButtonProps> = ({
             width: 48px;
             height: 48px;
             font-size: 20px;
+          }
+          
+          .floating-contact-button > div {
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
           }
           
           .contact-tooltip {

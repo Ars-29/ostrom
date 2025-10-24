@@ -4,9 +4,10 @@ import './ScrollingText.scss';
 interface ScrollingTextProps {
   targetSection: string; // Selector for the target section (e.g., '.persona-space.persona-1')
   children?: React.ReactNode; // Optional children prop for nested content
+  disableBackground?: boolean; // Optional prop to disable transparent background circle
 }
 
-const ScrollingText: React.FC<ScrollingTextProps> = ({ targetSection, children }) => {
+const ScrollingText: React.FC<ScrollingTextProps> = ({ targetSection, children, disableBackground = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(1); // Start outside the zone (at the bottom)
   const [isVisible, setIsVisible] = useState(false);
@@ -38,7 +39,7 @@ const ScrollingText: React.FC<ScrollingTextProps> = ({ targetSection, children }
 
   return (
     <>
-      <div className={`scrolling-text-background ${isVisible ? 'visible' : ''}`}></div>
+      {!disableBackground && <div className={`scrolling-text-background ${isVisible ? 'visible' : ''}`}></div>}
       <div
         className={`scrolling-text-container ${isVisible ? 'visible' : ''}`}
         ref={containerRef}

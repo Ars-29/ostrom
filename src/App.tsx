@@ -118,7 +118,9 @@ const App = () => {
       <OverlayImageProvider>
         <ReactLenis root={true}>
           <Loader onComplete={handleLoaderComplete} />
-          <ScoreDisplay />
+          <div className="top-header">
+            <ScoreDisplay />
+          </div>
           {!isMobile && (<MouseFollower />)}
           {debugMode && (
             <FPSStats />
@@ -135,7 +137,7 @@ const App = () => {
                   <p>&nbsp;</p>
                   <p>&nbsp;</p>
                   <p>At the crossroads of legacy and progress</p>
-                  <p>The urban odyssey begins in Chaussée d’Antin</p>
+                  <p>The urban odyssey begins in Chaussée d'Antin</p>
                   <p>Shaped by elegance and velocity</p>
                   <p>A motorist of distinction, unbound by time and place</p>
                   <p>&nbsp;</p>

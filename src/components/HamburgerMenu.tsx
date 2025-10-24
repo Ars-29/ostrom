@@ -112,43 +112,65 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
     transition: 'all 0.3s ease'
   });
   
-  // Get hamburger button styles
+  // Get hamburger button styles - Modern design
   const getButtonStyles = (): React.CSSProperties => ({
     position: 'fixed',
-    top: '50px',
-    left: '145px', // Position to the right of the circle logo area
-    width: '48px',
-    height: '48px',
+    top: '20px',
+    left: '15px', // Moved closer to left edge
+    width: '40px',
+    height: '40px',
     borderRadius: '8px',
     backgroundColor: 'transparent',
     border: 'none',
     boxShadow: 'none',
-    zIndex: 50, // Reduced from 1001 to prevent interference
+    zIndex: 1002, // Higher than TitleSection (1001) to ensure visibility
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    gap: '4px',
+    gap: '6px', // Increased gap for better spacing
     pointerEvents: 'auto', // Ensure only direct touches work
     touchAction: 'manipulation' // Prevent double-tap zoom
   });
   
-  // Get hamburger line styles
-  const getLineStyles = (lineNumber: number): React.CSSProperties => ({
-    width: '20px',
-    height: '2px',
-    backgroundColor: '#333333',
-    borderRadius: '1px',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: isOpen 
-      ? (lineNumber === 1 ? 'rotate(45deg) translate(5px, 5px)' :
-         lineNumber === 2 ? 'opacity(0)' :
-         'rotate(-45deg) translate(7px, -6px)')
-      : 'none',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)'
-  });
+  // Get hamburger line styles - Modern design with rounded ends
+  const getLineStyles = (lineNumber: number): React.CSSProperties => {
+    const baseStyles: React.CSSProperties = {
+      height: '1px',
+      backgroundColor: '#000000',
+      borderRadius: '1px', // Rounded ends
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      transform: isOpen 
+        ? (lineNumber === 1 ? 'rotate(45deg) translate(6px, 6px)' :
+           lineNumber === 2 ? 'opacity(0) scale(0)' :
+           'rotate(-45deg) translate(6px, -6px)')
+        : 'none'
+    };
+
+    // Progressive width design - each line shorter than the previous, all left-aligned
+    if (!isOpen) {
+      if (lineNumber === 1) {
+        // Top line - longest
+        baseStyles.width = '24px';
+        baseStyles.alignSelf = 'flex-start';
+      } else if (lineNumber === 2) {
+        // Middle line - shorter than top
+        baseStyles.width = '20px';
+        baseStyles.alignSelf = 'flex-start';
+      } else {
+        // Bottom line - shortest
+        baseStyles.width = '16px';
+        baseStyles.alignSelf = 'flex-start';
+      }
+    } else {
+      // When open, all lines have same width for animation
+      baseStyles.width = '24px';
+    }
+
+    return baseStyles;
+  };
   
   // Get menu header styles
   const getHeaderStyles = (): React.CSSProperties => ({
@@ -301,11 +323,27 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           -webkit-touch-callout: none; /* Disable iOS callout */
           -webkit-user-select: none; /* Disable text selection */
           user-select: none;
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        
+        .hamburger-button:focus,
+        .hamburger-button:active {
+          background-color: transparent !important;
+          outline: none !important;
+          border: none !important;
+          box-shadow: none !important;
+          transform: none !important;
         }
         
         .hamburger-button:hover {
-          background-color: rgba(255, 255, 255, 1) !important;
-          transform: scale(1.05);
+          background-color: transparent !important;
+          transform: none;
+        }
+        
+        .hamburger-button:hover > div {
+          background-color: #000000 !important;
         }
         
         @keyframes slideInFromLeft {
@@ -322,10 +360,15 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           }
           
           .hamburger-button {
-            top: 25px !important;
-            left: 90px !important; /* Closer to circle logo on mobile */
-            width: 44px !important;
-            height: 44px !important;
+            top: 7px !important;
+            left: -4px !important; /* Moved closer to left edge on mobile */
+            width: 36px !important;
+            height: 36px !important;
+            gap: 4px !important; /* Slightly smaller gap on mobile */
+          }
+          
+          .hamburger-button > div {
+            height: 1px !important; /* Thinner on mobile */
           }
         }
         
