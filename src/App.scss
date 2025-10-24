@@ -16,10 +16,6 @@ html, body, #app{
   width: 100%;
 }
 
-#app {
-  
-}
-
 canvas {
   display: block;
   width: 100dvw;
@@ -66,8 +62,8 @@ canvas {
   top: 0;
   left: 0;
   right: 0;
-  height: 80px;
-  background: rgba(255, 255, 255, 1);
+  height: 83px;
+  background: radial-gradient(circle at top, rgba(240, 235, 225, 1) 0%, rgba(245, 240, 230, 0.95) 50%, rgba(250, 245, 235, 0.9) 100%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);

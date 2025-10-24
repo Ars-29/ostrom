@@ -115,10 +115,10 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   // Get hamburger button styles - Modern design
   const getButtonStyles = (): React.CSSProperties => ({
     position: 'fixed',
-    top: '50px',
+    top: '20px',
     left: '15px', // Moved closer to left edge
-    width: '48px',
-    height: '48px',
+    width: '40px',
+    height: '40px',
     borderRadius: '8px',
     backgroundColor: 'transparent',
     border: 'none',
@@ -138,9 +138,9 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   // Get hamburger line styles - Modern design with rounded ends
   const getLineStyles = (lineNumber: number): React.CSSProperties => {
     const baseStyles: React.CSSProperties = {
-      height: '2px',
+      height: '1px',
       backgroundColor: '#000000',
-      borderRadius: '2px', // Rounded ends
+      borderRadius: '1px', // Rounded ends
       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       transform: isOpen 
         ? (lineNumber === 1 ? 'rotate(45deg) translate(6px, 6px)' :
@@ -360,15 +360,15 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
           }
           
           .hamburger-button {
-            top: 25px !important;
-            left: 8px !important; /* Moved closer to left edge on mobile */
-            width: 44px !important;
-            height: 44px !important;
-            gap: 5px !important; /* Slightly smaller gap on mobile */
+            top: 7px !important;
+            left: -4px !important; /* Moved closer to left edge on mobile */
+            width: 36px !important;
+            height: 36px !important;
+            gap: 4px !important; /* Slightly smaller gap on mobile */
           }
           
           .hamburger-button > div {
-            height: 2px !important; /* Thinner on mobile */
+            height: 1px !important; /* Thinner on mobile */
           }
         }
         

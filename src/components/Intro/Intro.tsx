@@ -10,18 +10,22 @@ const Intro: React.FC<IntroProps> = ({ hasStarted }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showPlayButton, setShowPlayButton] = useState(false); // fallback if play() fails even after start
+  const [isLandscape, setIsLandscape] = useState(false);
   const { registerVideo, unregisterVideo } = useSound();
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+      setIsLandscape(window.innerWidth > window.innerHeight);
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
     };
   }, []);
 
@@ -50,6 +54,52 @@ const Intro: React.FC<IntroProps> = ({ hasStarted }) => {
       });
     }
   }, [hasStarted]);
+
+  // Handle body scroll locking and navbar hiding in landscape mode
+  useEffect(() => {
+    if (isMobile && isLandscape) {
+      // Lock body scroll aggressively
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100vh';
+      document.body.style.top = '0';
+      document.body.classList.add('landscape-fullscreen');
+      
+      // Hide navbar with important flag
+      const navbar = document.querySelector('.top-header') as HTMLElement;
+      if (navbar) {
+        navbar.style.display = 'none';
+        navbar.style.visibility = 'hidden';
+      }
+      
+      // Also hide root scroll
+      const root = document.getElementById('root');
+      if (root) {
+        root.style.overflow = 'hidden';
+      }
+      
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.top = '';
+        document.body.classList.remove('landscape-fullscreen');
+        
+        // Show navbar again
+        if (navbar) {
+          navbar.style.display = '';
+          navbar.style.visibility = '';
+        }
+        
+        // Restore root scroll
+        if (root) {
+          root.style.overflow = '';
+        }
+      };
+    }
+  }, [isMobile, isLandscape]);
 
   useEffect(() => {
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
@@ -94,10 +144,10 @@ const Intro: React.FC<IntroProps> = ({ hasStarted }) => {
   };
 
   return (
-    <div className="intro" id="intro-trigger">
+    <div className={`intro ${isLandscape ? 'intro--landscape' : 'intro--portrait'}`} id="intro-trigger">
       <video
         ref={videoRef}
-        className="intro__video"
+        className={`intro__video ${isLandscape ? 'intro__video--landscape' : 'intro__video--portrait'}`}
         src={isMobile ? introMobileVideo : introVideo}
         // Removed autoPlay: we manually start after loader completion
         muted

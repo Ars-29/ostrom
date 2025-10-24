@@ -81,10 +81,20 @@ const TitleSection: React.FC<TitleSectionProps> = ({ id, title, subtitle, titleX
               setIsVisible(true);
               hasAnimated = true;
             }
+            // Only hide navbar elements when TitleSection background is visible in navbar area
+            // Check if the TitleSection is covering the top portion of the screen
+            const rect = entry.boundingClientRect;
+            const navbarHeight = 83; // Height of navbar
+            if (rect.top <= navbarHeight && rect.bottom >= navbarHeight) {
+              document.body.classList.add('title-bg-active');
+            }
           } else if (!triggerOnce && hasAnimated && !entry.isIntersecting) {
             // Allow replay when leaving viewport if triggerOnce = false
             setIsVisible(false);
             hasAnimated = false;
+            document.body.classList.remove('title-bg-active');
+          } else if (!entry.isIntersecting) {
+            document.body.classList.remove('title-bg-active');
           }
         });
       },
@@ -97,7 +107,10 @@ const TitleSection: React.FC<TitleSectionProps> = ({ id, title, subtitle, titleX
 
     observer.observe(target);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      document.body.classList.remove('title-bg-active');
+    };
   }, [triggerOnce]);
 
   return (
